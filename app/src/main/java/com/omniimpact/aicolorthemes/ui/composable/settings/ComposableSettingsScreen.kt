@@ -5,18 +5,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.omniimpact.aicolorthemes.model.ThemeModel
 import com.omniimpact.aicolorthemes.ui.composable.app.ComposableAppScaffold
 import com.omniimpact.aicolorthemes.ui.theme.AIColorThemesTheme
 import com.omniimpact.aicolorthemes.viewmodel.settings.IViewModelSettings
+import com.omniimpact.aicolorthemes.viewmodel.settings.ViewModelSettings
 
 @Composable
 fun ComposableSettingsScreen(
-	viewModel: IViewModelSettings,
+	viewModel: IViewModelSettings = viewModel<ViewModelSettings>(),
 	onBackClick: () -> Unit
 ) {
 	ComposableAppScaffold(
-		title = "Settings",
+		title = com.omniimpact.aicolorthemes.ui.composable.app.Screen.Settings.title,
 		onBackClick = onBackClick
 	) { innerPadding ->
 		Column(modifier = Modifier.padding(innerPadding)) {

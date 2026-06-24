@@ -4,46 +4,43 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.omniimpact.aicolorthemes.viewmodel.home.ViewModelHome
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.omniimpact.aicolorthemes.ui.composable.home.ComposableHomeScreen
 import com.omniimpact.aicolorthemes.ui.composable.picker.ComposablePickerScreen
 import com.omniimpact.aicolorthemes.ui.composable.settings.ComposableSettingsScreen
-import com.omniimpact.aicolorthemes.viewmodel.picker.ViewModelPicker
-import com.omniimpact.aicolorthemes.viewmodel.settings.ViewModelSettings
+
+enum class Screen(val route: String, val title: String) {
+	Home("home", "Home"),
+	Picker("picker", "Picker"),
+	Settings("settings", "Settings")
+}
 
 @Composable
-fun ComposableAppNavHost(
-	viewModelSettings: ViewModelSettings,
-	viewModelPicker: ViewModelPicker
-) {
+fun ComposableAppNavHost() {
 	val navController = rememberNavController()
 
 	NavHost(
 		navController = navController,
-		startDestination = "home"
+		startDestination = Screen.Home.route
 	) {
-		composable("home") {
+		composable(Screen.Home.route) {
 			ComposableHomeScreen(
 				onNavigateToPicker = {
-					navController.navigate("picker")
+					navController.navigate(Screen.Picker.route)
 				},
 				onNavigateToSettings = {
-					navController.navigate("settings")
+					navController.navigate(Screen.Settings.route)
 				}
 			)
 		}
-		composable("picker") {
+		composable(Screen.Picker.route) {
 			ComposablePickerScreen(
-				viewModel = viewModelPicker,
 				onBackClick = {
 					navController.popBackStack()
 				}
 			)
 		}
-		composable("settings") {
+		composable(Screen.Settings.route) {
 			ComposableSettingsScreen(
-				viewModel = viewModelSettings,
 				onBackClick = {
 					navController.popBackStack()
 				}

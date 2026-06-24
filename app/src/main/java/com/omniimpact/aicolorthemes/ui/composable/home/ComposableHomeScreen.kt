@@ -15,22 +15,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.omniimpact.aicolorthemes.ui.composable.app.ComposableAppScaffold
+import com.omniimpact.aicolorthemes.ui.theme.AIColorThemesTheme
+import com.omniimpact.aicolorthemes.viewmodel.home.IViewModelHome
 import com.omniimpact.aicolorthemes.viewmodel.home.ViewModelHome
-
 
 @Composable
 fun ComposableHomeScreen(
 	onNavigateToPicker: () -> Unit,
 	onNavigateToSettings: () -> Unit,
-	viewModel: ViewModelHome = viewModel()
+	viewModel: IViewModelHome = viewModel<ViewModelHome>()
 ) {
 	LaunchedEffect(Unit) {
 		viewModel.refreshSettings()
 	}
 	ComposableAppScaffold(
-		title = "AI Color Themes",
+		title = com.omniimpact.aicolorthemes.ui.composable.app.Screen.Home.title,
 		actions = {
 			IconButton(onClick = { viewModel.clearThemes() }) {
 				Icon(
@@ -68,5 +70,46 @@ fun ComposableHomeScreen(
 				CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
 			}
 		}
+	}
+}
+
+class MockViewModelHome : IViewModelHome {
+	override val colorSelected = androidx.compose.ui.graphics.Color.Red
+	override val isColorActive = true
+	override fun refreshSettings() {}
+	override val text = ""
+	override fun updateText(newValue: String) {}
+	override val themeCreationRowState = object : IComposableThemeCreationRow {
+		override val onPickerClick = {}
+		override val pickerColor = androidx.compose.ui.graphics.Color.Red
+		override val isSwatchActive = true
+		override val text = ""
+		override val onTextChange: (String) -> Unit = {}
+		override val placeholderText = "Theme name"
+		override val buttonText = "Generate"
+		override val onButtonClick = {}
+	}
+	override val themes = listOf(
+		com.omniimpact.aicolorthemes.model.ModelColorTheme(
+			themeName = "Mock Theme",
+			themeDescription = "Description",
+			promptQuery = "Query",
+			colorTheme = listOf("#FF0000", "#00FF00", "#0000FF")
+		)
+	)
+	override val isLoading = false
+	override fun removeTheme(theme: com.omniimpact.aicolorthemes.model.ModelColorTheme) {}
+	override fun clearThemes() {}
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewHomeScreen() {
+	AIColorThemesTheme {
+		ComposableHomeScreen(
+			onNavigateToPicker = {},
+			onNavigateToSettings = {},
+			viewModel = MockViewModelHome()
+		)
 	}
 }

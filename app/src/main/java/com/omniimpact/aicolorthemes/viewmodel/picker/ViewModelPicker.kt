@@ -13,7 +13,6 @@ import com.omniimpact.aicolorthemes.utility.IDeepSeekResult
 import com.omniimpact.aicolorthemes.utility.UtilityDeepSeekQuery
 import com.omniimpact.aicolorthemes.utility.UtilitySettings
 import com.omniimpact.aicolorthemes.ui.composable.home.IComposableThemeCreationRow
-import com.omniimpact.aicolorthemes.ui.composable.picker.IViewModelPickerUI
 import androidx.core.graphics.toColorInt
 
 
@@ -30,9 +29,10 @@ interface IViewModelPicker {
 	val buttonText: String
 	fun onButtonClick()
 	val themeCreationRowState: IComposableThemeCreationRow
+	val isLoading: Boolean
 }
 
-class ViewModelPicker(application: Application) : AndroidViewModel(application), IViewModelPicker, IViewModelPickerUI {
+class ViewModelPicker(application: Application) : AndroidViewModel(application), IViewModelPicker {
 	private val utilitySettings = UtilitySettings(application)
 	override var isLoading by mutableStateOf(false)
 		private set
@@ -76,7 +76,6 @@ class ViewModelPicker(application: Application) : AndroidViewModel(application),
 	override val placeholderText = "Describe a Color"
 	override val buttonText = "Pick"
 	
-	// AI-COMPLETED: result.colorHex is instead receiving the input color description instead of the hex code. you may also investigate the logic in UtilityDeepSeekQuery to fix this. The log for "Content" shows a json object with a proper hex value in the "colorHex" field.
 	override fun onButtonClick() {
 		ClassLog.d(ViewModelPicker::class, "onButtonClick triggered")
 		isLoading = true

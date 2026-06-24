@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 import com.omniimpact.aicolorthemes.ui.composable.app.ComposableAppScaffold
@@ -26,32 +27,28 @@ import com.omniimpact.aicolorthemes.ui.composable.home.ComposableThemeCreationRo
 import com.omniimpact.aicolorthemes.ui.composable.home.IComposableThemeCreationRow
 import com.omniimpact.aicolorthemes.viewmodel.picker.IViewModelPicker
 import com.omniimpact.aicolorthemes.ui.theme.AIColorThemesTheme
-
-interface IViewModelPickerUI : IViewModelPicker {
-	val isLoading: Boolean
-}
+import com.omniimpact.aicolorthemes.viewmodel.picker.ViewModelPicker
+import com.omniimpact.aicolorthemes.ui.composable.app.Screen.Picker
+import androidx.compose.foundation.layout.Spacer
+import com.github.skydoves.colorpicker.compose.*
 
 @Composable
 fun ComposablePickerScreen(
-	viewModel: IViewModelPickerUI,
+	viewModel: IViewModelPicker = viewModel<ViewModelPicker>(),
 	onBackClick: () -> Unit
 ) {
-	var shouldActivateColor = true
-	val controller = rememberColorPickerController()
 
+	val controller = rememberColorPickerController()
 	androidx.compose.runtime.LaunchedEffect(viewModel.colorSelected) {
-		shouldActivateColor = false
 		controller.selectByColor(viewModel.colorSelected, false)
 	}
 
 	ComposableAppScaffold(
-		title = "Picker",
+		title = Picker.title,
 		onBackClick = onBackClick,
 		actions = {
 			IconButton(onClick = {
-				shouldActivateColor = false
 				viewModel.clearColor()
-				viewModel.toggleColorActive(false)
 			}) {
 				Icon(
 					imageVector = Icons.Default.Delete,
@@ -84,15 +81,16 @@ fun ComposablePickerScreen(
 								.height(300.dp),
 							controller = controller,
 							onColorChanged = { colorEnvelope ->
-								viewModel.updateColor(colorEnvelope.color, shouldActivate = shouldActivateColor)
-								if(!shouldActivateColor) shouldActivateColor = true
+								if (colorEnvelope.fromUser) {
+									viewModel.updateColor(colorEnvelope.color, shouldActivate = true)
+								}
 							},
 							initialColor = viewModel.colorSelected
 						)
-						
-						androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(16.dp))
-						
-						com.github.skydoves.colorpicker.compose.BrightnessSlider(
+
+						Spacer(modifier = Modifier.height(16.dp))
+
+						BrightnessSlider(
 							modifier = Modifier
 								.fillMaxWidth()
 								.height(40.dp),
@@ -118,7 +116,7 @@ fun ComposablePickerScreen(
 fun ComposablePickerScreenPreviewLight() {
 	AIColorThemesTheme(darkTheme = false) {
 		ComposablePickerScreen(
-			viewModel = object : IViewModelPickerUI {
+			viewModel = object : IViewModelPicker {
 				override val colorSelected = Color.Red
 				override val isColorActive = true
 				override fun updateColor(color: Color, shouldActivate: Boolean) {}
@@ -140,6 +138,39 @@ fun ComposablePickerScreenPreviewLight() {
 					override val onButtonClick = {}
 				}
 				override val isLoading = false
+			},
+			onBackClick = {}
+		)
+	}
+}
+
+@Preview(showBackground = true, name = "Dark Mode")
+@Composable
+fun ComposablePickerScreenPreviewDark() {
+	AIColorThemesTheme(darkTheme = true) {
+		ComposablePickerScreen(
+			viewModel = object : IViewModelPicker {
+				override val colorSelected = Color.Red
+				override val isColorActive = true
+				override fun updateColor(color: Color, shouldActivate: Boolean) {}
+				override fun toggleColorActive(active: Boolean) {}
+				override fun clearColor() {}
+				override val text = ""
+				override fun updateText(newValue: String) {}
+				override val placeholderText = ""
+				override val buttonText = ""
+				override fun onButtonClick() {}
+				override val themeCreationRowState = object : IComposableThemeCreationRow {
+					override val onPickerClick = {}
+					override val pickerColor = Color.Red
+					override val isSwatchActive = true
+					override val text = ""
+					override val onTextChange = { _: String -> }
+					override val placeholderText = "Describe a Color"
+					override val buttonText = "Pick"
+					override val onButtonClick = {}
+				}
+				override val isLoading = true
 			},
 			onBackClick = {}
 		)

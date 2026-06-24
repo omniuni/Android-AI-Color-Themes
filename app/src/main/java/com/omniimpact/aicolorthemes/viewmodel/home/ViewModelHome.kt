@@ -76,7 +76,15 @@ class ViewModelHome(application: Application) : AndroidViewModel(application), I
 		UtilityDeepSeekQuery.send(getApplication(), query, object : IDeepSeekResult<ModelColorTheme> {
 			override fun onSuccess(result: ModelColorTheme) {
 				isLoading = false
-				themes = listOf(result) + themes
+				val validColors = result.colorTheme.filter { colorHex ->
+					try {
+						android.graphics.Color.parseColor(colorHex)
+						true
+					} catch (_: Exception) {
+						false
+					}
+				}
+				themes = listOf(result.copy(colorTheme = validColors)) + themes
 			}
 			override fun onFailure(message: String) {
 				isLoading = false

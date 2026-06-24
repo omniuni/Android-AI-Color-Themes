@@ -32,7 +32,6 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
 import com.omniimpact.aicolorthemes.model.ModelColorTheme
@@ -47,57 +46,39 @@ fun ComposableThemeItem(theme: ModelColorTheme, onRemove: () -> Unit) {
 			Row(horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
 				Column(modifier = Modifier.weight(1f)) {
 					Text(text = theme.themeName, style = MaterialTheme.typography.titleMedium)
-					Text(text = theme.themeDescription, style = MaterialTheme.typography.bodyMedium)
 				}
-				IconButton(onClick = onRemove) {
+				IconButton(onClick = onRemove, modifier = Modifier.padding(start = 8.dp)) {
 					Icon(imageVector = Icons.Default.Close, contentDescription = "Remove")
 				}
 			}
+			Row(horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top, modifier = Modifier.fillMaxWidth()) {
+				Text(text = theme.themeDescription, style = MaterialTheme.typography.bodyMedium)
+			}
 			FlowRow(modifier = Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
 				theme.colorTheme.forEach { colorHex ->
-					val colorInt = try {
-						colorHex.toColorInt()
-					} catch (_: Exception) {
-						null
-					}
-					if (colorInt != null) {
-						Box(
-							modifier = Modifier
-								.size(90.dp, 40.dp)
-								.clip(RoundedCornerShape(4.dp))
-								.background(Color(colorInt))
-								.clickable {
-									val clip = ClipData.newPlainText("Color", colorHex)
-									clipboardManager.setPrimaryClip(clip)
-								},
-							contentAlignment = Alignment.Center
-						) {
-							Text(
-								text = colorHex,
-								style = MaterialTheme.typography.labelSmall,
-								fontFamily = FontFamily.Monospace,
-								maxLines = 1,
-								overflow = TextOverflow.Ellipsis,
-								color = if (Color(colorInt).luminance() > 0.5f) Color.Black else Color.White
-							)
-						}
+					val colorInt = colorHex.toColorInt()
+					Box(
+						modifier = Modifier
+							.size(90.dp, 40.dp)
+							.clip(RoundedCornerShape(4.dp))
+							.background(Color(colorInt))
+							.clickable {
+								val clip = ClipData.newPlainText("Color", colorHex)
+								clipboardManager.setPrimaryClip(clip)
+							},
+						contentAlignment = Alignment.Center
+					) {
+						Text(
+							text = colorHex,
+							style = MaterialTheme.typography.labelSmall,
+							fontFamily = FontFamily.Monospace,
+							maxLines = 1,
+							overflow = TextOverflow.Ellipsis,
+							color = if (Color(colorInt).luminance() > 0.5f) Color.Black else Color.White
+						)
 					}
 				}
 			}
 		}
 	}
-}
-
-@Preview
-@Composable
-fun PreviewComposableThemeItem() {
-	ComposableThemeItem(
-		theme = ModelColorTheme(
-			promptQuery = "A sample color theme for preview purposes.",
-			themeName = "Sample Theme",
-			themeDescription = "A sample description.",
-			colorTheme = listOf("#FF0000", "#00FF00", "#0000FF")
-		),
-		onRemove = {}
-	)
 }
