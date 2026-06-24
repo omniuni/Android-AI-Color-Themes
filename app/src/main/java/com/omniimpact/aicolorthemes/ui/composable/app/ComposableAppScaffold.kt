@@ -2,6 +2,10 @@ package com.omniimpact.aicolorthemes.ui.composable.app
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.union
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,7 +40,8 @@ fun ComposableAppScaffold(
 				},
 				actions = actions
 			)
-		}
+		},
+		contentWindowInsets = WindowInsets.systemBars.union(WindowInsets.ime)
 	) { innerPadding ->
 		content(innerPadding)
 	}

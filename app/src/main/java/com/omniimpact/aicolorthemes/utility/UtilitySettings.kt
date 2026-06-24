@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.first
@@ -77,6 +78,34 @@ class UtilitySettings(private val context: Context) {
 		return runBlocking {
 			val preferences = context.dataStore.data.first()
 			preferences[booleanPreferencesKey(key)] ?: defaultValue
+		}
+	}
+
+	/**
+	 * Saves an integer value associated with a specific key.
+	 *
+	 * @param key The key to associate the value with.
+	 * @param value The integer value to save.
+	 */
+	fun saveInt(key: String, value: Int) {
+		runBlocking {
+			context.dataStore.edit { settings ->
+				settings[intPreferencesKey(key)] = value
+			}
+		}
+	}
+
+	/**
+	 * Retrieves an integer value associated with a specific key.
+	 *
+	 * @param key The key to look up.
+	 * @param defaultValue The value to return if the key is not found.
+	 * @return The saved integer value or [defaultValue] if not present.
+	 */
+	fun getInt(key: String, defaultValue: Int): Int {
+		return runBlocking {
+			val preferences = context.dataStore.data.first()
+			preferences[intPreferencesKey(key)] ?: defaultValue
 		}
 	}
 }
