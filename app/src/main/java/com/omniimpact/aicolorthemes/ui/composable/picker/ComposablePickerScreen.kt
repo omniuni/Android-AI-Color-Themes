@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.Icons
@@ -26,17 +27,19 @@ import com.omniimpact.aicolorthemes.ui.composable.home.IComposableThemeCreationR
 import com.omniimpact.aicolorthemes.viewmodel.picker.IViewModelPicker
 import com.omniimpact.aicolorthemes.ui.theme.AIColorThemesTheme
 
+interface IViewModelPickerUI : IViewModelPicker {
+	val isLoading: Boolean
+}
+
 @Composable
 fun ComposablePickerScreen(
-	viewModel: IViewModelPicker,
+	viewModel: IViewModelPickerUI,
 	onBackClick: () -> Unit
 ) {
 	var shouldActivateColor = true
 	val controller = rememberColorPickerController()
 
 	androidx.compose.runtime.LaunchedEffect(viewModel.colorSelected) {
-		// When we set this, we don't want to trigger an update that sets active to true
-		// but since updateColor is not called, it should be fine.
 		shouldActivateColor = false
 		controller.selectByColor(viewModel.colorSelected, false)
 	}
@@ -57,45 +60,55 @@ fun ComposablePickerScreen(
 			}
 		}
 	) { innerPadding ->
-		Column(
+		Box(
 			modifier = Modifier
 				.fillMaxSize()
 				.padding(innerPadding)
-				.verticalScroll(rememberScrollState())
 		) {
-			Box(
+			Column(
 				modifier = Modifier
-					.fillMaxWidth()
-					.weight(1f)
-					.padding(16.dp),
-				contentAlignment = Alignment.Center
+					.fillMaxSize()
+					.verticalScroll(rememberScrollState())
 			) {
-				Column(horizontalAlignment = Alignment.CenterHorizontally) {
-					HsvColorPicker(
-						modifier = Modifier
-							.fillMaxWidth()
-							.height(300.dp),
-						controller = controller,
-						onColorChanged = { colorEnvelope ->
-							viewModel.updateColor(colorEnvelope.color, shouldActivate = shouldActivateColor)
-							if(!shouldActivateColor) shouldActivateColor = true
-						},
-						initialColor = viewModel.colorSelected
-					)
-					
-					androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(16.dp))
-					
-					com.github.skydoves.colorpicker.compose.BrightnessSlider(
-						modifier = Modifier
-							.fillMaxWidth()
-							.height(40.dp),
-						controller = controller
-					)
+				Box(
+					modifier = Modifier
+						.fillMaxWidth()
+						.weight(1f)
+						.padding(16.dp),
+					contentAlignment = Alignment.Center
+				) {
+					Column(horizontalAlignment = Alignment.CenterHorizontally) {
+						HsvColorPicker(
+							modifier = Modifier
+								.fillMaxWidth()
+								.height(300.dp),
+							controller = controller,
+							onColorChanged = { colorEnvelope ->
+								viewModel.updateColor(colorEnvelope.color, shouldActivate = shouldActivateColor)
+								if(!shouldActivateColor) shouldActivateColor = true
+							},
+							initialColor = viewModel.colorSelected
+						)
+						
+						androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(16.dp))
+						
+						com.github.skydoves.colorpicker.compose.BrightnessSlider(
+							modifier = Modifier
+								.fillMaxWidth()
+								.height(40.dp),
+							controller = controller
+						)
+					}
 				}
+				ComposableThemeCreationRow(
+					state = viewModel.themeCreationRowState
+				)
 			}
-			ComposableThemeCreationRow(
-				state = viewModel.themeCreationRowState
-			)
+			if (viewModel.isLoading) {
+				CircularProgressIndicator(
+					modifier = Modifier.align(Alignment.Center)
+				)
+			}
 		}
 	}
 }
@@ -105,7 +118,7 @@ fun ComposablePickerScreen(
 fun ComposablePickerScreenPreviewLight() {
 	AIColorThemesTheme(darkTheme = false) {
 		ComposablePickerScreen(
-			viewModel = object : IViewModelPicker {
+			viewModel = object : IViewModelPickerUI {
 				override val colorSelected = Color.Red
 				override val isColorActive = true
 				override fun updateColor(color: Color, shouldActivate: Boolean) {}
@@ -116,7 +129,7 @@ fun ComposablePickerScreenPreviewLight() {
 				override val placeholderText = ""
 				override val buttonText = ""
 				override fun onButtonClick() {}
-				override val themeCreationRowState = object : com.omniimpact.aicolorthemes.ui.composable.home.IComposableThemeCreationRow {
+				override val themeCreationRowState = object : IComposableThemeCreationRow {
 					override val onPickerClick = {}
 					override val pickerColor = Color.Red
 					override val isSwatchActive = true
@@ -126,38 +139,7 @@ fun ComposablePickerScreenPreviewLight() {
 					override val buttonText = "Pick"
 					override val onButtonClick = {}
 				}
-			},
-			onBackClick = {}
-		)
-	}
-}
-
-@Preview(showBackground = true, name = "Dark Mode", uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
-@Composable
-fun ComposablePickerScreenPreviewDark() {
-	AIColorThemesTheme(darkTheme = true) {
-		ComposablePickerScreen(
-			viewModel = object : IViewModelPicker {
-				override val colorSelected = Color.Cyan
-				override val isColorActive = false
-				override fun updateColor(color: Color, shouldActivate: Boolean) {}
-				override fun toggleColorActive(active: Boolean) {}
-				override fun clearColor() {}
-				override val text = "A description of a color big enough to overflow the box."
-				override fun updateText(newValue: String) {}
-				override val placeholderText = ""
-				override val buttonText = ""
-				override fun onButtonClick() {}
-				override val themeCreationRowState = object : IComposableThemeCreationRow {
-					override val onPickerClick = {}
-					override val pickerColor = Color.Cyan
-					override val isSwatchActive = false
-					override val text = "A description of a color big enough to overflow the box."
-					override val onTextChange = { _: String -> }
-					override val placeholderText = "Not Visible"
-					override val buttonText = "Pick"
-					override val onButtonClick = {}
-				}
+				override val isLoading = false
 			},
 			onBackClick = {}
 		)

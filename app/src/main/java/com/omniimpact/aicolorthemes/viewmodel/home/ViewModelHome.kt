@@ -7,6 +7,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.AndroidViewModel
+import com.omniimpact.aicolorthemes.model.ModelColorTheme
+import com.omniimpact.aicolorthemes.utility.IDeepSeekResult
+import com.omniimpact.aicolorthemes.utility.UtilityDeepSeekQuery
 import com.omniimpact.aicolorthemes.ui.composable.home.IComposableThemeCreationRow
 import com.omniimpact.aicolorthemes.utility.UtilitySettings
 
@@ -17,6 +20,10 @@ interface IViewModelHome {
 	val text: String
 	fun updateText(newValue: String)
 	val themeCreationRowState: IComposableThemeCreationRow
+	val themes: List<ModelColorTheme>
+	val isLoading: Boolean
+	fun removeTheme(theme: ModelColorTheme)
+	fun clearThemes()
 }
 
 class ViewModelHome(application: Application) : AndroidViewModel(application), IViewModelHome {
@@ -34,9 +41,47 @@ class ViewModelHome(application: Application) : AndroidViewModel(application), I
 
 	override var text by mutableStateOf("")
 		private set
+	
+	override var themes by mutableStateOf(listOf<ModelColorTheme>())
+		private set
+
+	override var isLoading by mutableStateOf(false)
+		private set
 
 	override fun updateText(newValue: String) {
 		text = newValue
+	}
+
+	override fun removeTheme(theme: ModelColorTheme) {
+		themes = themes.filter { it != theme }
+	}
+
+	override fun clearThemes() {
+		themes = emptyList()
+	}
+	
+	private fun createTheme() {
+		val anchorColor = if (isColorActive) {
+			" Anchor Color: #${Integer.toHexString(colorSelected.toArgb()).substring(2)}"
+		} else ""
+		
+		val query = ModelColorTheme(
+			promptQuery = text + anchorColor,
+			themeName = text.take(20),
+			themeDescription = text,
+			colorTheme = emptyList()
+		)
+		
+		isLoading = true
+		UtilityDeepSeekQuery.send(getApplication(), query, object : IDeepSeekResult<ModelColorTheme> {
+			override fun onSuccess(result: ModelColorTheme) {
+				isLoading = false
+				themes = listOf(result) + themes
+			}
+			override fun onFailure(message: String) {
+				isLoading = false
+			}
+		})
 	}
 
 	override val themeCreationRowState: IComposableThemeCreationRow
@@ -48,6 +93,6 @@ class ViewModelHome(application: Application) : AndroidViewModel(application), I
 			override val onTextChange = { newText: String -> updateText(newText) }
 			override val placeholderText = "Enter theme description"
 			override val buttonText = "Create"
-			override val onButtonClick = {}
+			override val onButtonClick = { createTheme() }
 		}
 }

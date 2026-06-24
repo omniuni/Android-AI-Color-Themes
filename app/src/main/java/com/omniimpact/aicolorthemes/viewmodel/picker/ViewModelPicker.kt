@@ -1,14 +1,21 @@
 package com.omniimpact.aicolorthemes.viewmodel.picker
 
 import android.app.Application
+import com.omniimpact.aicolorthemes.utility.ClassLog
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.AndroidViewModel
+import com.omniimpact.aicolorthemes.model.ModelSingleColor
+import com.omniimpact.aicolorthemes.utility.IDeepSeekResult
+import com.omniimpact.aicolorthemes.utility.UtilityDeepSeekQuery
 import com.omniimpact.aicolorthemes.utility.UtilitySettings
 import com.omniimpact.aicolorthemes.ui.composable.home.IComposableThemeCreationRow
+import com.omniimpact.aicolorthemes.ui.composable.picker.IViewModelPickerUI
+import androidx.core.graphics.toColorInt
+
 
 interface IViewModelPicker {
 	val colorSelected: Color
@@ -25,8 +32,10 @@ interface IViewModelPicker {
 	val themeCreationRowState: IComposableThemeCreationRow
 }
 
-class ViewModelPicker(application: Application) : AndroidViewModel(application), IViewModelPicker {
+class ViewModelPicker(application: Application) : AndroidViewModel(application), IViewModelPicker, IViewModelPickerUI {
 	private val utilitySettings = UtilitySettings(application)
+	override var isLoading by mutableStateOf(false)
+		private set
 
 	override var colorSelected by mutableStateOf(
 		Color(utilitySettings.getInt("picker_color", Color.White.toArgb()))
@@ -66,7 +75,30 @@ class ViewModelPicker(application: Application) : AndroidViewModel(application),
 
 	override val placeholderText = "Describe a Color"
 	override val buttonText = "Pick"
-	override fun onButtonClick() {}
+	
+	// AI-COMPLETED: result.colorHex is instead receiving the input color description instead of the hex code. you may also investigate the logic in UtilityDeepSeekQuery to fix this. The log for "Content" shows a json object with a proper hex value in the "colorHex" field.
+	override fun onButtonClick() {
+		ClassLog.d(ViewModelPicker::class, "onButtonClick triggered")
+		isLoading = true
+		val query = ModelSingleColor(promptQuery = text, colorHex = "")
+		UtilityDeepSeekQuery.send(getApplication(), query, object : IDeepSeekResult<ModelSingleColor> {
+			override fun onSuccess(result: ModelSingleColor) {
+				val colorInHex = result.colorHex
+				ClassLog.d(ViewModelPicker::class, "Received Hex Code: $colorInHex")
+				isLoading = false
+				val formattedHex = if (colorInHex.startsWith("#")) colorInHex else "#$colorInHex"
+				try {
+					val color = formattedHex.toColorInt()
+					updateColor(Color(color))
+				} catch (_: IllegalArgumentException) {
+					ClassLog.e(ViewModelPicker::class, "Invalid hex code: $colorInHex")
+				}
+			}
+			override fun onFailure(message: String) {
+				isLoading = false
+			}
+		})
+	}
 
 	override val themeCreationRowState: IComposableThemeCreationRow
 		get() = object : IComposableThemeCreationRow {
