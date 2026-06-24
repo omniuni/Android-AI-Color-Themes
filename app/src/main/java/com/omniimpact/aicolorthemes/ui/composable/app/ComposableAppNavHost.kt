@@ -1,12 +1,14 @@
 package com.omniimpact.aicolorthemes.ui.composable.app
 
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.omniimpact.aicolorthemes.ui.composable.home.ComposableHomeScreen
 import com.omniimpact.aicolorthemes.ui.composable.picker.ComposablePickerScreen
 import com.omniimpact.aicolorthemes.ui.composable.settings.ComposableSettingsScreen
+import com.omniimpact.aicolorthemes.viewmodel.settings.ViewModelSettings
 
 enum class Screen(val route: String, val title: String) {
 	Home("home", "Home"),
@@ -15,7 +17,9 @@ enum class Screen(val route: String, val title: String) {
 }
 
 @Composable
-fun ComposableAppNavHost() {
+fun ComposableAppNavHost(
+	viewModelSettings: ViewModelSettings = viewModel<ViewModelSettings>()
+) {
 	val navController = rememberNavController()
 
 	NavHost(
@@ -41,6 +45,7 @@ fun ComposableAppNavHost() {
 		}
 		composable(Screen.Settings.route) {
 			ComposableSettingsScreen(
+				viewModel = viewModelSettings,
 				onBackClick = {
 					navController.popBackStack()
 				}
