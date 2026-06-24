@@ -55,25 +55,32 @@ fun ComposableThemeItem(theme: ModelColorTheme, onRemove: () -> Unit) {
 			}
 			FlowRow(modifier = Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
 				theme.colorTheme.forEach { colorHex ->
-					Box(
-						modifier = Modifier
-							.size(90.dp, 40.dp)
-							.clip(RoundedCornerShape(4.dp))
-							.background(Color(colorHex.toColorInt()))
-							.clickable {
-								val clip = ClipData.newPlainText("Color", colorHex)
-								clipboardManager.setPrimaryClip(clip)
-							},
-						contentAlignment = Alignment.Center
-					) {
-						Text(
-							text = colorHex,
-							style = MaterialTheme.typography.labelSmall,
-							fontFamily = FontFamily.Monospace,
-							maxLines = 1,
-							overflow = TextOverflow.Ellipsis,
-							color = if (Color(colorHex.toColorInt()).luminance() > 0.5f) Color.Black else Color.White
-						)
+					val colorInt = try {
+						colorHex.toColorInt()
+					} catch (_: Exception) {
+						null
+					}
+					if (colorInt != null) {
+						Box(
+							modifier = Modifier
+								.size(90.dp, 40.dp)
+								.clip(RoundedCornerShape(4.dp))
+								.background(Color(colorInt))
+								.clickable {
+									val clip = ClipData.newPlainText("Color", colorHex)
+									clipboardManager.setPrimaryClip(clip)
+								},
+							contentAlignment = Alignment.Center
+						) {
+							Text(
+								text = colorHex,
+								style = MaterialTheme.typography.labelSmall,
+								fontFamily = FontFamily.Monospace,
+								maxLines = 1,
+								overflow = TextOverflow.Ellipsis,
+								color = if (Color(colorInt).luminance() > 0.5f) Color.Black else Color.White
+							)
+						}
 					}
 				}
 			}

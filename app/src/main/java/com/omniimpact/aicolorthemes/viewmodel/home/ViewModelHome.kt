@@ -62,13 +62,13 @@ class ViewModelHome(application: Application) : AndroidViewModel(application), I
 	
 	private fun createTheme() {
 		val anchorColor = if (isColorActive) {
-			" Anchor Color: #${Integer.toHexString(colorSelected.toArgb()).substring(2)}"
+			"Anchor Color: #${Integer.toHexString(colorSelected.toArgb()).substring(2)} \n\n"
 		} else ""
 		
 		val query = ModelColorTheme(
-			promptQuery = text + anchorColor,
-			themeName = text.take(20),
-			themeDescription = text,
+			promptQuery = anchorColor + text,
+			themeName = "",
+			themeDescription = "",
 			colorTheme = emptyList()
 		)
 		
