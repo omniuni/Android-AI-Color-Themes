@@ -6,6 +6,8 @@ data class ModelColorTheme(
         Include at least one complimentary color with a distinctly different hue or shade from the others.
         In larger themes, include some colors of different saturation.
         Do not repeat colors. Do not include hex codes in the name or description of the theme.
+        The themeName is a title that should reflect the prompt, or what part of the prompt inspired the theme.
+        The themeDescription should focus on the inspiration and concept behind the theme. Keep the description to a single sentence.
         Order the colors from darker shades to lighter, except the anchor color, which is always first.
         Most of the theme should be based on the anchor color if it is provided.
         Try to vary the approach to the color theme within these parameters, and avoid hues that are too similar and could clash.

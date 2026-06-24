@@ -5,14 +5,15 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -34,72 +35,80 @@ interface IComposableThemeCreationRow {
 	val onButtonClick: () -> Unit
 }
 
+//AI-COMPLETED: remove padding on the buttons so that the word "create" and the "x" fit
 @Composable
 fun ComposableThemeCreationRow(
 	state: IComposableThemeCreationRow,
 	modifier: Modifier = Modifier
 ) {
 	val focusManager = LocalFocusManager.current
-	Row(
-		modifier = modifier
-			.fillMaxWidth()
-			.padding(16.dp),
-		verticalAlignment = Alignment.CenterVertically
+	Card(
+		modifier = modifier.fillMaxWidth(),
+		shape = MaterialTheme.shapes.medium
 	) {
-		// Color Swatch Button
-		OutlinedButton(
-			onClick = {
-				focusManager.clearFocus()
-				state.onPickerClick()
-			},
-			modifier = Modifier
-				.height(56.dp)
-				.aspectRatio(1f),
-			shape = RectangleShape,
-			colors = androidx.compose.material3.ButtonDefaults.outlinedButtonColors(
-				containerColor = state.pickerColor
-			),
-			contentPadding = PaddingValues(0.dp)
+		Row(
+			modifier = Modifier.fillMaxWidth(),
+			verticalAlignment = Alignment.CenterVertically
 		) {
-			if (!state.isSwatchActive) {
-				Icon(
-					imageVector = Icons.Default.Close,
-					contentDescription = "Inactive",
-					tint = MaterialTheme.colorScheme.onSurface
+			// Color Swatch Button
+			Button(
+				onClick = {
+					focusManager.clearFocus()
+					state.onPickerClick()
+				},
+				modifier = Modifier
+					.height(56.dp)
+					.aspectRatio(1f),
+				shape = RectangleShape,
+				contentPadding = PaddingValues(0.dp),
+				colors = ButtonDefaults.buttonColors(
+					containerColor = state.pickerColor,
+					contentColor = MaterialTheme.colorScheme.onSurface
+				)
+			) {
+				if (!state.isSwatchActive) {
+					Icon(
+						imageVector = Icons.Default.Close,
+						contentDescription = "Inactive"
+					)
+				}
+			}
+
+			// Prompt Text Box
+			TextField(
+				value = state.text,
+				onValueChange = state.onTextChange,
+				modifier = Modifier
+					.weight(1f)
+					.height(56.dp),
+				placeholder = { Text(state.placeholderText) },
+				maxLines = 1,
+				singleLine = true,
+				colors = TextFieldDefaults.colors(
+					focusedIndicatorColor = Color.Transparent,
+					unfocusedIndicatorColor = Color.Transparent,
+					disabledIndicatorColor = Color.Transparent
+				)
+			)
+
+			// Action Button
+			Button(
+				onClick = {
+					focusManager.clearFocus()
+					state.onButtonClick()
+				},
+				modifier = Modifier
+					.height(56.dp)
+					.aspectRatio(1f),
+				shape = RectangleShape,
+				contentPadding = PaddingValues(0.dp)
+			) {
+				Text(
+					text = state.buttonText,
+					style = MaterialTheme.typography.labelSmall,
+					maxLines = 1
 				)
 			}
-		}
-
-		// Prompt Text Box
-		OutlinedTextField(
-			value = state.text,
-			onValueChange = state.onTextChange,
-			modifier = Modifier
-				.weight(1f)
-				.padding(horizontal = 8.dp)
-				.height(56.dp),
-			placeholder = { Text(state.placeholderText) },
-			maxLines = 1,
-			singleLine = true
-		)
-
-		// Action Button
-		Button(
-			onClick = {
-				focusManager.clearFocus()
-				state.onButtonClick()
-			},
-			modifier = Modifier
-				.height(56.dp)
-				.aspectRatio(1f),
-			shape = RectangleShape,
-			contentPadding = PaddingValues(0.dp)
-		) {
-			Text(
-				text = state.buttonText,
-				style = MaterialTheme.typography.labelSmall,
-				maxLines = 1
-			)
 		}
 	}
 }
@@ -115,10 +124,18 @@ val mockState = object : IComposableThemeCreationRow {
 	override val onButtonClick = {}
 }
 
-@Preview(showBackground = true)
+@Preview
 @Composable
 fun ComposableThemeCreationRowPreview() {
 	com.omniimpact.aicolorthemes.ui.theme.AIColorThemesTheme(darkTheme = false) {
+		ComposableThemeCreationRow(state = mockState)
+	}
+}
+
+@Preview
+@Composable
+fun ComposableThemeCreationRowPreviewDark() {
+	com.omniimpact.aicolorthemes.ui.theme.AIColorThemesTheme(darkTheme = true) {
 		ComposableThemeCreationRow(state = mockState)
 	}
 }

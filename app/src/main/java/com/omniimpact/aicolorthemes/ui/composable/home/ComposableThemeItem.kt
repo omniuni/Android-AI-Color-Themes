@@ -34,7 +34,9 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.omniimpact.aicolorthemes.model.ModelColorTheme
+import com.omniimpact.aicolorthemes.ui.theme.AIColorThemesTheme
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -80,5 +82,21 @@ fun ComposableThemeItem(theme: ModelColorTheme, onRemove: () -> Unit) {
 				}
 			}
 		}
+	}
+}
+
+@PreviewLightDark
+@Composable
+fun PreviewThemeItem() {
+	AIColorThemesTheme {
+		ComposableThemeItem(
+			theme = ModelColorTheme(
+				promptQuery = "",
+				themeName = "Sample Theme",
+				themeDescription = "This is a sample theme description.",
+				colorTheme = listOf("#FF0000", "#00FF00", "#0000FF")
+			),
+			onRemove = {}
+		)
 	}
 }

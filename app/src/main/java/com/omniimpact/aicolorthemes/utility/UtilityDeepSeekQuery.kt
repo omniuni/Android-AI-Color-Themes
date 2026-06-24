@@ -48,7 +48,7 @@ object UtilityDeepSeekQuery {
                 connection.doOutput = true
 
                 val jsonPayload = JSONObject()
-                jsonPayload.put("model", "deepseek-chat")
+                jsonPayload.put("model", "deepseek-v4-flash")
                 val messages = org.json.JSONArray()
                 val systemMessage = JSONObject().apply {
                     put("role", "system")
