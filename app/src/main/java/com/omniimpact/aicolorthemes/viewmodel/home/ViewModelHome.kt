@@ -101,6 +101,7 @@ class ViewModelHome(application: Application) : AndroidViewModel(application), I
 			override val onTextChange = { newText: String -> updateText(newText) }
 			override val placeholderText = "Enter theme description"
 			override val buttonText = "Create"
+			override val isButtonActive = !isLoading
 			override val onButtonClick = { createTheme() }
 		}
 }

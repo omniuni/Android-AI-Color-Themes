@@ -99,13 +99,23 @@ fun ComposablePickerScreen(
 					}
 				}
 				ComposableThemeCreationRow(
-					state = viewModel.themeCreationRowState
+					state = viewModel.themeCreationRowState,
+					modifier = Modifier.padding(8.dp)
 				)
 			}
 			if (viewModel.isLoading) {
-				CircularProgressIndicator(
-					modifier = Modifier.align(Alignment.Center)
-				)
+				androidx.compose.material3.Card(
+					modifier = Modifier.align(Alignment.Center).padding(16.dp),
+					elevation = androidx.compose.material3.CardDefaults.cardElevation(defaultElevation = 8.dp)
+				) {
+					Column(modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+						CircularProgressIndicator()
+						androidx.compose.material3.Text(
+							text = "Picking Your Color",
+							modifier = Modifier.padding(top = 8.dp)
+						)
+					}
+				}
 			}
 		}
 	}
@@ -136,6 +146,7 @@ fun ComposablePickerScreenPreviewLight() {
 					override val placeholderText = "Describe a Color"
 					override val buttonText = "Pick"
 					override val onButtonClick = {}
+					override val isButtonActive = true
 				}
 				override val isLoading = false
 			},
@@ -169,6 +180,7 @@ fun ComposablePickerScreenPreviewDark() {
 					override val placeholderText = "Describe a Color"
 					override val buttonText = "Pick"
 					override val onButtonClick = {}
+					override val isButtonActive = false
 				}
 				override val isLoading = true
 			},

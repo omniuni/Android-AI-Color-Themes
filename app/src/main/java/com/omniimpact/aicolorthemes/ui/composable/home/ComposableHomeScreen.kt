@@ -1,8 +1,14 @@
 package com.omniimpact.aicolorthemes.ui.composable.home
 
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -25,6 +31,7 @@ import com.omniimpact.aicolorthemes.ui.composable.app.ComposableAppScaffold
 import com.omniimpact.aicolorthemes.ui.theme.AIColorThemesTheme
 import com.omniimpact.aicolorthemes.viewmodel.home.IViewModelHome
 import com.omniimpact.aicolorthemes.viewmodel.home.ViewModelHome
+import com.omniimpact.aicolorthemes.ui.composable.app.Screen.Home
 
 @Composable
 fun ComposableHomeScreen(
@@ -36,7 +43,7 @@ fun ComposableHomeScreen(
 		viewModel.refreshSettings()
 	}
 	ComposableAppScaffold(
-		title = com.omniimpact.aicolorthemes.ui.composable.app.Screen.Home.title,
+		title = Home.title,
 		actions = {
 			IconButton(onClick = { viewModel.clearThemes() }) {
 				Icon(
@@ -63,18 +70,56 @@ fun ComposableHomeScreen(
 						}
 					}
 				}
-				ComposableThemeCreationRow(
-					state = creationState,
-					modifier = Modifier.padding(8.dp)
-				)
-				LazyColumn {
-					items(viewModel.themes) { theme ->
-						ComposableThemeItem(theme = theme, onRemove = { viewModel.removeTheme(theme) })
+				val isEmpty = viewModel.themes.isEmpty()
+				androidx.compose.animation.AnimatedContent(
+					targetState = isEmpty,
+					label = "HomeContentAnimation",
+					modifier = Modifier.fillMaxSize(),
+					transitionSpec = {
+						fadeIn() + expandVertically() togetherWith fadeOut() + shrinkVertically()
+					}
+				) { isListEmpty ->
+					Column(
+						modifier = Modifier
+							.fillMaxSize()
+							.then(if (isListEmpty) Modifier else Modifier.padding(bottom = 8.dp)),
+						verticalArrangement = if (isListEmpty) androidx.compose.foundation.layout.Arrangement.Center else androidx.compose.foundation.layout.Arrangement.Top
+					) {
+						ComposableThemeCreationRow(
+							state = creationState,
+							modifier = Modifier.padding(8.dp)
+						)
+						if (isListEmpty) {
+							androidx.compose.material3.Text(
+								text = "To create a color theme,\n provide an anchor color and description\n and click Create.",
+								modifier = Modifier.padding(16.dp).fillMaxWidth(),
+								textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+								style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
+								color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant
+							)
+						} else {
+							LazyColumn {
+								items(viewModel.themes) { theme ->
+									ComposableThemeItem(theme = theme, onRemove = { viewModel.removeTheme(theme) })
+								}
+							}
+						}
 					}
 				}
 			}
 			if (viewModel.isLoading) {
-				CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+				androidx.compose.material3.Card(
+					modifier = Modifier.align(Alignment.Center).padding(16.dp),
+					elevation = androidx.compose.material3.CardDefaults.cardElevation(defaultElevation = 8.dp)
+				) {
+					Column(modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+						CircularProgressIndicator()
+						androidx.compose.material3.Text(
+							text = "Creating Your Theme",
+							modifier = Modifier.padding(top = 8.dp)
+						)
+					}
+				}
 			}
 		}
 	}
@@ -95,6 +140,7 @@ class MockViewModelHome : IViewModelHome {
 		override val placeholderText = "Theme name"
 		override val buttonText = "Generate"
 		override val onButtonClick = {}
+		override val isButtonActive = true
 	}
 	override val themes = listOf(
 		com.omniimpact.aicolorthemes.model.ModelColorTheme(

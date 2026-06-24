@@ -108,6 +108,7 @@ class ViewModelPicker(application: Application) : AndroidViewModel(application),
 			override val onTextChange = { newText: String -> updateText(newText) }
 			override val placeholderText = this@ViewModelPicker.placeholderText
 			override val buttonText = this@ViewModelPicker.buttonText
+			override val isButtonActive = !isLoading
 			override val onButtonClick = { this@ViewModelPicker.onButtonClick() }
 		}
 }

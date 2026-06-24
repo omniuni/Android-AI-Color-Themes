@@ -32,10 +32,10 @@ interface IComposableThemeCreationRow {
 	val onTextChange: (String) -> Unit
 	val placeholderText: String
 	val buttonText: String
+	val isButtonActive: Boolean
 	val onButtonClick: () -> Unit
 }
 
-//AI-COMPLETED: remove padding on the buttons so that the word "create" and the "x" fit
 @Composable
 fun ComposableThemeCreationRow(
 	state: IComposableThemeCreationRow,
@@ -101,7 +101,8 @@ fun ComposableThemeCreationRow(
 					.height(56.dp)
 					.aspectRatio(1f),
 				shape = RectangleShape,
-				contentPadding = PaddingValues(0.dp)
+				contentPadding = PaddingValues(0.dp),
+				enabled = state.isButtonActive
 			) {
 				Text(
 					text = state.buttonText,
@@ -121,6 +122,7 @@ val mockState = object : IComposableThemeCreationRow {
 	override val onTextChange = { _: String -> }
 	override val placeholderText = "Enter theme description"
 	override val buttonText = "Create"
+	override val isButtonActive = true
 	override val onButtonClick = {}
 }
 
