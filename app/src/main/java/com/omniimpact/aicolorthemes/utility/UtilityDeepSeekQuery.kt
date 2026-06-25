@@ -10,8 +10,19 @@ import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
 
+/**
+ * Utility for performing AI queries using the DeepSeek API.
+ */
 object UtilityDeepSeekQuery {
 
+    /**
+     * Sends an AI query to the DeepSeek API and processes the JSON response into a result object.
+     *
+     * @param context The application context.
+     * @param query The query object containing the system and user prompts.
+     * @param callback The callback to handle the success or failure of the network request.
+     * @param T The type of the query and result model.
+     */
     fun <T : IDeepSeekQuery> send(context: Context, query: T, callback: IDeepSeekResult<T>) {
         val apiKey = UtilitySettings(context).getString("api_key", "")
         if (apiKey.isEmpty()) {
@@ -20,12 +31,15 @@ object UtilityDeepSeekQuery {
             return
         }
 
+        // Use reflection to inspect the query object and generate an example JSON schema 
+        // to guide the AI on the expected response format.
         val exampleJson = JSONObject()
         val fields = query::class.java.declaredFields
         for (field in fields) {
+            // Skip metadata and helper fields during reflection
             if (field.name != "INSTANCE" && field.name != "Companion" && field.name != "serialVersionUID" && 
                 field.name != "promptSystem" && field.name != "promptQuery" && field.name != "\$stable") {
-                field.isAccessible = true
+                field.isAccessible = true // Ensure private fields can be accessed
                 val type = field.type
                 exampleJson.put(field.name, when {
                     List::class.java.isAssignableFrom(type) -> org.json.JSONArray().put("string")
@@ -48,6 +62,7 @@ object UtilityDeepSeekQuery {
                 connection.doOutput = true
 
                 val jsonPayload = JSONObject()
+                // ... configuration for API request
                 jsonPayload.put("model", "deepseek-v4-flash")
                 val messages = org.json.JSONArray()
                 val systemMessage = JSONObject().apply {
@@ -77,11 +92,13 @@ object UtilityDeepSeekQuery {
                     val jsonResponse = JSONObject(response)
                     val content = jsonResponse.getJSONArray("choices").getJSONObject(0).getJSONObject("message").getString("content")
                     ClassLog.d(UtilityDeepSeekQuery::class, "Content: $content")
-                    
+
                     val resultJson = JSONObject(content)
                     val clazz = query::class.java
+                    // Get the primary constructor via reflection to instantiate the result object
                     val constructor = clazz.constructors[0]
 
+                    // Prepare default values based on parameter types for instantiation
                     val args = constructor.parameterTypes.map { type ->
                         when {
                             type == String::class.java -> ""
@@ -95,9 +112,11 @@ object UtilityDeepSeekQuery {
                         }
                     }.toTypedArray<Any?>()
 
+                    // Instantiate the result class dynamically
                     @Suppress("UNCHECKED_CAST")
                     val result = constructor.newInstance(*args) as T
 
+                    // Populate fields using reflection based on JSON keys
                     clazz.declaredFields.forEach { field ->
                         if (field.name == "INSTANCE" || field.name == "Companion" || field.name == "serialVersionUID") return@forEach
                         field.isAccessible = true

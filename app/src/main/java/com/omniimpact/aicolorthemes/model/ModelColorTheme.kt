@@ -4,7 +4,8 @@ data class ModelColorTheme(
     override val promptSystem: String = """Return a color theme between 3 and 12 colors.
         Make sure to include at least one very dark and one very light color for contrast.
         Include at least one complimentary color with a distinctly different hue or shade from the others.
-        In larger themes, include some colors of different saturation.
+        If the user asks for many colors, more colors, or a lot of colors, generate more colors.
+        In larger themes, include some colors of different saturation and another hue.
         Do not repeat colors. Do not include hex codes in the name or description of the theme.
         The themeName is a title that should reflect the prompt, or what part of the prompt inspired the theme.
         The themeDescription should focus on the inspiration and concept behind the theme. Keep the description to a single sentence.
