@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.update
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.omniimpact.aicolorthemes.model.ModelColorTheme
 import com.omniimpact.aicolorthemes.utility.IDeepSeekResult
 import com.omniimpact.aicolorthemes.utility.UtilityDeepSeekQuery
@@ -15,6 +16,7 @@ import com.omniimpact.aicolorthemes.utility.UtilitySettings
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import androidx.core.graphics.toColorInt
+import kotlinx.coroutines.launch
 
 interface IViewModelHome {
 	val colorSelected: StateFlow<Color>
@@ -79,24 +81,30 @@ class ViewModelHome @Inject constructor(
 			colorTheme = emptyList()
 		)
 		
-		_isLoading.value = true
-		utilityDeepSeekQuery.send(query, object : IDeepSeekResult<ModelColorTheme> {
-			override fun onSuccess(result: ModelColorTheme) {
-				_isLoading.value = false
-				val validColors = result.colorTheme.filter { colorHex ->
-					try {
-                        colorHex.toColorInt()
-						true
-					} catch (_: Exception) {
-						false
+		viewModelScope.launch {
+			utilityDeepSeekQuery.send(query).collect { result ->
+				when (result) {
+					is IDeepSeekResult.Loading -> {
+						_isLoading.value = true
+					}
+					is IDeepSeekResult.Success -> {
+						_isLoading.value = false
+						val validColors = result.data.colorTheme.filter { colorHex ->
+							try {
+								colorHex.toColorInt()
+								true
+							} catch (_: Exception) {
+								false
+							}
+						}
+						_themes.update { listOf(result.data.copy(colorTheme = validColors)) + it }
+					}
+					is IDeepSeekResult.Failure -> {
+						_isLoading.value = false
 					}
 				}
-				_themes.update { listOf(result.copy(colorTheme = validColors)) + it }
 			}
-			override fun onFailure(message: String) {
-				_isLoading.value = false
-			}
-		})
+		}
 	}
 
 	override val themeCreationRowState: IComposableThemeCreationRow

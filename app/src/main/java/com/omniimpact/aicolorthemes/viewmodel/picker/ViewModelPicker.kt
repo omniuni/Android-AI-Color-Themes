@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.update
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.omniimpact.aicolorthemes.model.ModelSingleColor
 import com.omniimpact.aicolorthemes.utility.IDeepSeekResult
 import com.omniimpact.aicolorthemes.utility.UtilityDeepSeekQuery
@@ -16,6 +17,7 @@ import com.omniimpact.aicolorthemes.ui.composable.home.IComposableThemeCreationR
 import androidx.core.graphics.toColorInt
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.launch
 
 
 interface IViewModelPicker {
@@ -83,25 +85,31 @@ class ViewModelPicker @Inject constructor(
 	
 	override fun onButtonClick() {
 		ClassLog.d(ViewModelPicker::class, "onButtonClick triggered")
-		_isLoading.value = true
 		val query = ModelSingleColor(promptQuery = _text.value, colorHex = "")
-		utilityDeepSeekQuery.send(query, object : IDeepSeekResult<ModelSingleColor> {
-			override fun onSuccess(result: ModelSingleColor) {
-				val colorInHex = result.colorHex
-				ClassLog.d(ViewModelPicker::class, "Received Hex Code: $colorInHex")
-				_isLoading.value = false
-				val formattedHex = if (colorInHex.startsWith("#")) colorInHex else "#$colorInHex"
-				try {
-					val color = formattedHex.toColorInt()
-					updateColor(Color(color))
-				} catch (_: IllegalArgumentException) {
-					ClassLog.e(ViewModelPicker::class, "Invalid hex code: $colorInHex")
+		viewModelScope.launch {
+			utilityDeepSeekQuery.send(query).collect { result ->
+				when (result) {
+					is IDeepSeekResult.Loading -> {
+						_isLoading.value = true
+					}
+					is IDeepSeekResult.Success -> {
+						_isLoading.value = false
+						val colorInHex = result.data.colorHex
+						ClassLog.d(ViewModelPicker::class, "Received Hex Code: $colorInHex")
+						val formattedHex = if (colorInHex.startsWith("#")) colorInHex else "#$colorInHex"
+						try {
+							val color = formattedHex.toColorInt()
+							updateColor(Color(color))
+						} catch (_: IllegalArgumentException) {
+							ClassLog.e(ViewModelPicker::class, "Invalid hex code: $colorInHex")
+						}
+					}
+					is IDeepSeekResult.Failure -> {
+						_isLoading.value = false
+					}
 				}
 			}
-			override fun onFailure(message: String) {
-				_isLoading.value = false
-			}
-		})
+		}
 	}
 
 	override val themeCreationRowState: IComposableThemeCreationRow

@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,11 +43,23 @@ fun ComposablePickerScreen(
 ) {
 
 	val colorSelected by viewModel.colorSelected.collectAsStateWithLifecycle()
+	val isColorActive by viewModel.isColorActive.collectAsStateWithLifecycle()
+	val text by viewModel.text.collectAsStateWithLifecycle()
 	val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
 
 	val controller = rememberColorPickerController()
 	androidx.compose.runtime.LaunchedEffect(colorSelected) {
 		controller.selectByColor(colorSelected, fromUser = false)
+	}
+
+	val baseState = viewModel.themeCreationRowState
+	val creationState = remember(baseState, isLoading, colorSelected, isColorActive, text) {
+		object : IComposableThemeCreationRow by baseState {
+			override val pickerColor = if (isColorActive) colorSelected else Color.Transparent
+			override val isSwatchActive = isColorActive
+			override val text = text
+			override val isButtonActive = !isLoading
+		}
 	}
 
 	ComposableAppScaffold(
@@ -112,7 +125,7 @@ fun ComposablePickerScreen(
 					}
 				}
 				ComposableThemeCreationRow(
-					state = viewModel.themeCreationRowState,
+					state = creationState,
 					modifier = Modifier.padding(8.dp)
 				)
 			}

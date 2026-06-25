@@ -1,6 +1,7 @@
 package com.omniimpact.aicolorthemes.utility
 
-interface IDeepSeekResult<T> {
-    fun onFailure(message: String)
-    fun onSuccess(result: T)
+sealed interface IDeepSeekResult<out T> {
+	object Loading : IDeepSeekResult<Nothing>
+	data class Success<out T>(val data: T) : IDeepSeekResult<T>
+	data class Failure(val message: String) : IDeepSeekResult<Nothing>
 }
