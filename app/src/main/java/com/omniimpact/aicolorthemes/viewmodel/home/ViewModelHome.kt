@@ -3,19 +3,17 @@ package com.omniimpact.aicolorthemes.viewmodel.home
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.omniimpact.aicolorthemes.model.ModelColorTheme
 import com.omniimpact.aicolorthemes.utility.IDeepSeekResult
-import com.omniimpact.aicolorthemes.utility.UtilityDeepSeekQuery
+import com.omniimpact.aicolorthemes.repository.ThemeRepository
 import com.omniimpact.aicolorthemes.ui.composable.home.IComposableThemeCreationRow
 import com.omniimpact.aicolorthemes.utility.UtilitySettings
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import androidx.core.graphics.toColorInt
 import kotlinx.coroutines.launch
 
 interface IViewModelHome {
@@ -34,7 +32,7 @@ interface IViewModelHome {
 @HiltViewModel
 class ViewModelHome @Inject constructor(
 	private val utilitySettings: UtilitySettings,
-	private val utilityDeepSeekQuery: UtilityDeepSeekQuery
+	private val themeRepository: ThemeRepository
 ) : ViewModel(), IViewModelHome {
 
 	private val _colorSelected = MutableStateFlow(Color(utilitySettings.getInt("picker_color", Color.Transparent.toArgb())))
@@ -51,8 +49,7 @@ class ViewModelHome @Inject constructor(
 	private val _text = MutableStateFlow("")
 	override val text: StateFlow<String> = _text.asStateFlow()
 	
-	private val _themes = MutableStateFlow(listOf<ModelColorTheme>())
-	override val themes: StateFlow<List<ModelColorTheme>> = _themes.asStateFlow()
+	override val themes: StateFlow<List<ModelColorTheme>> = themeRepository.themes
 
 	private val _isLoading = MutableStateFlow(false)
 	override val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -62,11 +59,11 @@ class ViewModelHome @Inject constructor(
 	}
 
 	override fun removeTheme(theme: ModelColorTheme) {
-		_themes.update { it.filter { t -> t != theme } }
+		themeRepository.removeTheme(theme)
 	}
 
 	override fun clearThemes() {
-		_themes.value = emptyList()
+		themeRepository.clearThemes()
 	}
 	
 	private fun createTheme() {
@@ -82,22 +79,13 @@ class ViewModelHome @Inject constructor(
 		)
 		
 		viewModelScope.launch {
-			utilityDeepSeekQuery.send(query).collect { result ->
+			themeRepository.createTheme(query).collect { result ->
 				when (result) {
 					is IDeepSeekResult.Loading -> {
 						_isLoading.value = true
 					}
 					is IDeepSeekResult.Success -> {
 						_isLoading.value = false
-						val validColors = result.data.colorTheme.filter { colorHex ->
-							try {
-								colorHex.toColorInt()
-								true
-							} catch (_: Exception) {
-								false
-							}
-						}
-						_themes.update { listOf(result.data.copy(colorTheme = validColors)) + it }
 					}
 					is IDeepSeekResult.Failure -> {
 						_isLoading.value = false

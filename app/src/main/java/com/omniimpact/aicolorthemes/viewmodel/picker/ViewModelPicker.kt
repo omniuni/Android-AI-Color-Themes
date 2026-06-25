@@ -4,14 +4,13 @@ import com.omniimpact.aicolorthemes.utility.ClassLog
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.omniimpact.aicolorthemes.model.ModelSingleColor
 import com.omniimpact.aicolorthemes.utility.IDeepSeekResult
-import com.omniimpact.aicolorthemes.utility.UtilityDeepSeekQuery
+import com.omniimpact.aicolorthemes.repository.ThemeRepository
 import com.omniimpact.aicolorthemes.utility.UtilitySettings
 import com.omniimpact.aicolorthemes.ui.composable.home.IComposableThemeCreationRow
 import androidx.core.graphics.toColorInt
@@ -39,7 +38,7 @@ interface IViewModelPicker {
 @HiltViewModel
 class ViewModelPicker @Inject constructor(
 	private val utilitySettings: UtilitySettings,
-	private val utilityDeepSeekQuery: UtilityDeepSeekQuery
+	private val themeRepository: ThemeRepository
 ) : ViewModel(), IViewModelPicker {
 	private val _isLoading = MutableStateFlow(false)
 	override val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -87,7 +86,7 @@ class ViewModelPicker @Inject constructor(
 		ClassLog.d(ViewModelPicker::class, "onButtonClick triggered")
 		val query = ModelSingleColor(promptQuery = _text.value, colorHex = "")
 		viewModelScope.launch {
-			utilityDeepSeekQuery.send(query).collect { result ->
+			themeRepository.getSingleColor(query).collect { result ->
 				when (result) {
 					is IDeepSeekResult.Loading -> {
 						_isLoading.value = true

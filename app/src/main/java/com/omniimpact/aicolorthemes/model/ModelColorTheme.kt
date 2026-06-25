@@ -15,8 +15,11 @@ data class ModelColorTheme(
         If the user requests `with` a color, or an `accent`, or similar phrasing, include it only as necessary.
         If an anchor color is provided, always make it the first one in the theme regardless of shade or brightness.
         """.trimMargin(),
-    override val promptQuery: String,
-    val themeName: String,
-    val themeDescription: String,
-    val colorTheme: List<String>
-) : IDeepSeekQuery
+	override val promptQuery: String = "",
+	val themeName: String = "",
+	val themeDescription: String = "",
+	val colorTheme: List<String> = emptyList()
+) : IDeepSeekQuery {
+	override fun copyWithPrompts(promptSystem: String, promptQuery: String): ModelColorTheme =
+		copy(promptSystem = promptSystem, promptQuery = promptQuery)
+}
