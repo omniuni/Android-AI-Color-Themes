@@ -10,3 +10,10 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+# Keep classes implementing IDeepSeekQuery and their fields to support reflection-based schema generation and Moshi deserialization.
+-keep interface com.omniimpact.aicolorthemes.model.IDeepSeekQuery { *; }
+-keep class * implements com.omniimpact.aicolorthemes.model.IDeepSeekQuery {
+    <fields>;
+    <init>(...);
+}

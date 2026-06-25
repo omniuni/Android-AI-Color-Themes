@@ -30,6 +30,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import com.omniimpact.aicolorthemes.R
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -50,7 +52,7 @@ fun ComposableThemeItem(theme: ModelColorTheme, onRemove: () -> Unit) {
 					Text(text = theme.themeName, style = MaterialTheme.typography.titleMedium)
 				}
 				IconButton(onClick = onRemove, modifier = Modifier.padding(start = 8.dp)) {
-					Icon(imageVector = Icons.Default.Close, contentDescription = "Remove")
+					Icon(imageVector = Icons.Default.Close, contentDescription = stringResource(R.string.remove))
 				}
 			}
 			Row(horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top, modifier = Modifier.fillMaxWidth()) {

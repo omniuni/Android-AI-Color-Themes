@@ -29,7 +29,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import com.omniimpact.aicolorthemes.R
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -55,22 +57,19 @@ fun ComposableHomeScreen(
 	val isColorActive by viewModel.isColorActive.collectAsStateWithLifecycle()
 	val text by viewModel.text.collectAsStateWithLifecycle()
 
-	LaunchedEffect(Unit) {
-		viewModel.refreshSettings()
-	}
 	ComposableAppScaffold(
 		title = Home.title,
 		actions = {
 			IconButton(onClick = { viewModel.clearThemes() }) {
 				Icon(
 					imageVector = Icons.Default.Delete,
-					contentDescription = "Clear all themes"
+					contentDescription = stringResource(R.string.clear_all_themes)
 				)
 			}
 			IconButton(onClick = onNavigateToSettings) {
 				Icon(
 					imageVector = Icons.Default.Settings,
-					contentDescription = "Settings"
+					contentDescription = stringResource(R.string.settings)
 				)
 			}
 		}
@@ -110,7 +109,7 @@ fun ComposableHomeScreen(
 						)
 						if (isListEmpty) {
                             Text(
-                                text = "To create a color theme,\n provide an anchor color and description\n and click Create.",
+                                text = stringResource(R.string.home_empty_prompt),
                                 modifier = Modifier.padding(16.dp).fillMaxWidth(),
                                 textAlign = TextAlign.Center,
                                 style = MaterialTheme.typography.bodyMedium,
@@ -134,7 +133,7 @@ fun ComposableHomeScreen(
 					Column(modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
 						CircularProgressIndicator()
                         Text(
-                            text = "Creating Your Theme",
+                            text = stringResource(R.string.creating_your_theme),
                             modifier = Modifier.padding(top = 8.dp)
                         )
 					}
@@ -147,7 +146,6 @@ fun ComposableHomeScreen(
 class MockViewModelHome : IViewModelHome {
 	override val colorSelected = MutableStateFlow(Color.Red)
 	override val isColorActive = MutableStateFlow(true)
-	override fun refreshSettings() {}
 	override val text = MutableStateFlow("")
 	override fun updateText(newValue: String) {}
 	override val themeCreationRowState = object : IComposableThemeCreationRow {

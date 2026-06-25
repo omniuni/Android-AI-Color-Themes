@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">AI Color Themes</string>
+    <string name="clear_all_themes">Clear all themes</string>
+    <string name="settings">Settings</string>
+    <string name="inactive">Inactive</string>
+    <string name="back">Back</string>
+    <string name="remove">Remove</string>
+    <string name="clear_color">Clear Color</string>
+    <string name="picking_your_color">Picking Your Color</string>
+    <string name="creating_your_theme">Creating Your Theme</string>
+    <string name="home_empty_prompt">To create a color theme,\n provide an anchor color and description\n and click Create.</string>
 </resources>

@@ -1,23 +1,25 @@
 package com.omniimpact.aicolorthemes.viewmodel.picker
 
-import com.omniimpact.aicolorthemes.utility.ClassLog
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.core.graphics.toColorInt
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.omniimpact.aicolorthemes.model.ModelSingleColor
-import com.omniimpact.aicolorthemes.utility.IDeepSeekResult
 import com.omniimpact.aicolorthemes.repository.ThemeRepository
-import com.omniimpact.aicolorthemes.utility.UtilitySettings
 import com.omniimpact.aicolorthemes.ui.composable.home.IComposableThemeCreationRow
-import androidx.core.graphics.toColorInt
+import com.omniimpact.aicolorthemes.utility.ClassLog
+import com.omniimpact.aicolorthemes.utility.IDeepSeekResult
+import com.omniimpact.aicolorthemes.utility.UtilitySettings
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-
+import javax.inject.Inject
 
 interface IViewModelPicker {
 	val colorSelected: StateFlow<Color>
@@ -43,33 +45,41 @@ class ViewModelPicker @Inject constructor(
 	private val _isLoading = MutableStateFlow(false)
 	override val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-	private val _colorSelected = MutableStateFlow(
-		Color(utilitySettings.getInt("picker_color", Color.White.toArgb()))
-	)
-	override val colorSelected: StateFlow<Color> = _colorSelected.asStateFlow()
+	override val colorSelected: StateFlow<Color> = utilitySettings.getIntFlow("picker_color", Color.White.toArgb())
+		.map { Color(it) }
+		.stateIn(
+			scope = viewModelScope,
+			started = SharingStarted.WhileSubscribed(5000),
+			initialValue = Color.White
+		)
 
-	private val _isColorActive = MutableStateFlow(
-		utilitySettings.getBoolean("picker_color_active", false)
-	)
-	override val isColorActive: StateFlow<Boolean> = _isColorActive.asStateFlow()
+	override val isColorActive: StateFlow<Boolean> = utilitySettings.getBooleanFlow("picker_color_active", false)
+		.stateIn(
+			scope = viewModelScope,
+			started = SharingStarted.WhileSubscribed(5000),
+			initialValue = false
+		)
 
 	override fun updateColor(color: Color, shouldActivate: Boolean) {
-		_colorSelected.value = color
-		utilitySettings.saveInt("picker_color", color.toArgb())
-		if (shouldActivate) {
-			toggleColorActive(true)
+		viewModelScope.launch {
+			utilitySettings.saveInt("picker_color", color.toArgb())
+			if (shouldActivate) {
+				toggleColorActive(true)
+			}
 		}
 	}
 
 	override fun toggleColorActive(active: Boolean) {
-		_isColorActive.value = active
-		utilitySettings.saveBoolean("picker_color_active", active)
+		viewModelScope.launch {
+			utilitySettings.saveBoolean("picker_color_active", active)
+		}
 	}
 
 	override fun clearColor() {
-		_colorSelected.value = Color.White
-		utilitySettings.saveInt("picker_color", Color.White.toArgb())
-		toggleColorActive(false)
+		viewModelScope.launch {
+			utilitySettings.saveInt("picker_color", Color.White.toArgb())
+			utilitySettings.saveBoolean("picker_color_active", false)
+		}
 	}
 
 	private val _text = MutableStateFlow("")
@@ -113,9 +123,9 @@ class ViewModelPicker @Inject constructor(
 
 	override val themeCreationRowState: IComposableThemeCreationRow
 		get() = object : IComposableThemeCreationRow {
-			override val onPickerClick = { toggleColorActive(!_isColorActive.value) }
-			override val pickerColor = if (_isColorActive.value) _colorSelected.value else Color.Transparent
-			override val isSwatchActive = _isColorActive.value
+			override val onPickerClick = { toggleColorActive(!isColorActive.value) }
+			override val pickerColor = if (isColorActive.value) colorSelected.value else Color.Transparent
+			override val isSwatchActive = isColorActive.value
 			override val text = _text.value
 			override val onTextChange = { newText: String -> updateText(newText) }
 			override val placeholderText = this@ViewModelPicker.placeholderText

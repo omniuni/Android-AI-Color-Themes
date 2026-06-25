@@ -33,6 +33,8 @@ import com.omniimpact.aicolorthemes.viewmodel.picker.IViewModelPicker
 import com.omniimpact.aicolorthemes.ui.theme.AIColorThemesTheme
 import com.omniimpact.aicolorthemes.viewmodel.picker.ViewModelPicker
 import com.omniimpact.aicolorthemes.ui.composable.app.Screen.Picker
+import androidx.compose.ui.res.stringResource
+import com.omniimpact.aicolorthemes.R
 import androidx.compose.foundation.layout.Spacer
 import com.github.skydoves.colorpicker.compose.*
 
@@ -71,7 +73,7 @@ fun ComposablePickerScreen(
 			) {
 				Icon(
 					imageVector = Icons.Default.Delete,
-					contentDescription = "Clear Color"
+					contentDescription = stringResource(R.string.clear_color)
 				)
 			}
 		}
@@ -137,7 +139,7 @@ fun ComposablePickerScreen(
 					Column(modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
 						CircularProgressIndicator()
 						androidx.compose.material3.Text(
-							text = "Picking Your Color",
+							text = stringResource(R.string.picking_your_color),
 							modifier = Modifier.padding(top = 8.dp)
 						)
 					}

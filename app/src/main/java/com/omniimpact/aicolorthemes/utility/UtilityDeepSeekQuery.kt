@@ -1,12 +1,14 @@
 package com.omniimpact.aicolorthemes.utility
 
+import com.omniimpact.aicolorthemes.di.IoDispatcher
 import com.omniimpact.aicolorthemes.model.IDeepSeekQuery
 import com.omniimpact.aicolorthemes.network.ChatMessage
 import com.omniimpact.aicolorthemes.network.ChatRequest
 import com.omniimpact.aicolorthemes.network.DeepSeekApiService
 import com.squareup.moshi.Moshi
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import org.json.JSONObject
@@ -20,7 +22,8 @@ import javax.inject.Singleton
 class UtilityDeepSeekQuery @Inject constructor(
 	private val utilitySettings: UtilitySettings,
 	private val moshi: Moshi,
-	private val deepSeekApiService: DeepSeekApiService
+	private val deepSeekApiService: DeepSeekApiService,
+	@param:IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) {
 
 	/**
@@ -33,7 +36,7 @@ class UtilityDeepSeekQuery @Inject constructor(
 	fun <T : IDeepSeekQuery> send(query: T): Flow<IDeepSeekResult<T>> = flow {
 		emit(IDeepSeekResult.Loading)
 
-		val apiKey = utilitySettings.getString("api_key", "")
+		val apiKey = utilitySettings.getStringFlow("api_key", "").first()
 		if (apiKey.isEmpty()) {
 			ClassLog.e(UtilityDeepSeekQuery::class, "No API key saved")
 			emit(IDeepSeekResult.Failure("No API key saved"))
@@ -96,7 +99,7 @@ class UtilityDeepSeekQuery @Inject constructor(
 			ClassLog.e(UtilityDeepSeekQuery::class, "Exception: ${e.message}", e)
 			emit(IDeepSeekResult.Failure(e.message ?: "Unknown error"))
 		}
-	}.flowOn(Dispatchers.IO)
+	}.flowOn(ioDispatcher)
 
 	/**
 	 * Copies the deserialized result with the original query's prompts.

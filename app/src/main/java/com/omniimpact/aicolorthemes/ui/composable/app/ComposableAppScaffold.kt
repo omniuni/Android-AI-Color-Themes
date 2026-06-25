@@ -16,6 +16,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 
+import androidx.compose.ui.res.stringResource
+import com.omniimpact.aicolorthemes.R
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ComposableAppScaffold(
@@ -33,7 +36,7 @@ fun ComposableAppScaffold(
 						IconButton(onClick = onBackClick) {
 							Icon(
 								imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-								contentDescription = "Back"
+								contentDescription = stringResource(R.string.back)
 							)
 						}
 					}
