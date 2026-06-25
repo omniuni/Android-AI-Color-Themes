@@ -1,5 +1,6 @@
 package com.omniimpact.aicolorthemes.ui.composable.picker
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,12 +15,14 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 import com.omniimpact.aicolorthemes.ui.composable.app.ComposableAppScaffold
@@ -35,21 +38,24 @@ import com.github.skydoves.colorpicker.compose.*
 @Composable
 fun ComposablePickerScreen(
 	viewModel: IViewModelPicker = hiltViewModel<ViewModelPicker>(),
-	onBackClick: () -> Unit
+	onBackClick: () -> Unit,
 ) {
 
+	val colorSelected by viewModel.colorSelected.collectAsStateWithLifecycle()
+	val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+
 	val controller = rememberColorPickerController()
-	androidx.compose.runtime.LaunchedEffect(viewModel.colorSelected) {
-		controller.selectByColor(viewModel.colorSelected, false)
+	androidx.compose.runtime.LaunchedEffect(colorSelected) {
+		controller.selectByColor(colorSelected, fromUser = false)
 	}
 
 	ComposableAppScaffold(
 		title = Picker.title,
 		onBackClick = onBackClick,
 		actions = {
-			IconButton(onClick = {
-				viewModel.clearColor()
-			}) {
+			IconButton(
+				onClick = { viewModel.clearColor() }
+			) {
 				Icon(
 					imageVector = Icons.Default.Delete,
 					contentDescription = "Clear Color"
@@ -65,37 +71,44 @@ fun ComposablePickerScreen(
 			Column(
 				modifier = Modifier
 					.fillMaxSize()
-					.verticalScroll(rememberScrollState())
 			) {
-				Box(
+				Column(
 					modifier = Modifier
 						.fillMaxWidth()
 						.weight(1f)
-						.padding(16.dp),
-					contentAlignment = Alignment.Center
+						.verticalScroll(rememberScrollState()),
+					horizontalAlignment = Alignment.CenterHorizontally,
+					verticalArrangement = Arrangement.Center
 				) {
-					Column(horizontalAlignment = Alignment.CenterHorizontally) {
-						HsvColorPicker(
-							modifier = Modifier
-								.fillMaxWidth()
-								.height(300.dp),
-							controller = controller,
-							onColorChanged = { colorEnvelope ->
-								if (colorEnvelope.fromUser) {
-									viewModel.updateColor(colorEnvelope.color, shouldActivate = true)
-								}
-							},
-							initialColor = viewModel.colorSelected
-						)
+					Box(
+						modifier = Modifier
+							.fillMaxWidth()
+							.padding(16.dp),
+						contentAlignment = Alignment.Center
+					) {
+						Column(horizontalAlignment = Alignment.CenterHorizontally) {
+							HsvColorPicker(
+								modifier = Modifier
+									.fillMaxWidth()
+									.height(300.dp),
+								controller = controller,
+								onColorChanged = { colorEnvelope ->
+									if (colorEnvelope.fromUser) {
+										viewModel.updateColor(colorEnvelope.color, shouldActivate = true)
+									}
+								},
+								initialColor = colorSelected
+							)
 
-						Spacer(modifier = Modifier.height(16.dp))
+							Spacer(modifier = Modifier.height(16.dp))
 
-						BrightnessSlider(
-							modifier = Modifier
-								.fillMaxWidth()
-								.height(40.dp),
-							controller = controller
-						)
+							BrightnessSlider(
+								modifier = Modifier
+									.fillMaxWidth()
+									.height(40.dp),
+								controller = controller
+							)
+						}
 					}
 				}
 				ComposableThemeCreationRow(
@@ -103,7 +116,7 @@ fun ComposablePickerScreen(
 					modifier = Modifier.padding(8.dp)
 				)
 			}
-			if (viewModel.isLoading) {
+			if (isLoading) {
 				androidx.compose.material3.Card(
 					modifier = Modifier.align(Alignment.Center).padding(16.dp),
 					elevation = androidx.compose.material3.CardDefaults.cardElevation(defaultElevation = 8.dp)
@@ -127,12 +140,12 @@ fun ComposablePickerScreenPreviewLight() {
 	AIColorThemesTheme(darkTheme = false) {
 		ComposablePickerScreen(
 			viewModel = object : IViewModelPicker {
-				override val colorSelected = Color.Red
-				override val isColorActive = true
+				override val colorSelected = kotlinx.coroutines.flow.MutableStateFlow(Color.Red)
+				override val isColorActive = kotlinx.coroutines.flow.MutableStateFlow(true)
 				override fun updateColor(color: Color, shouldActivate: Boolean) {}
 				override fun toggleColorActive(active: Boolean) {}
 				override fun clearColor() {}
-				override val text = ""
+				override val text = kotlinx.coroutines.flow.MutableStateFlow("")
 				override fun updateText(newValue: String) {}
 				override val placeholderText = ""
 				override val buttonText = ""
@@ -148,10 +161,9 @@ fun ComposablePickerScreenPreviewLight() {
 					override val onButtonClick = {}
 					override val isButtonActive = true
 				}
-				override val isLoading = false
+				override val isLoading = kotlinx.coroutines.flow.MutableStateFlow(false)
 			},
-			onBackClick = {}
-		)
+		) {}
 	}
 }
 
@@ -161,12 +173,12 @@ fun ComposablePickerScreenPreviewDark() {
 	AIColorThemesTheme(darkTheme = true) {
 		ComposablePickerScreen(
 			viewModel = object : IViewModelPicker {
-				override val colorSelected = Color.Red
-				override val isColorActive = true
+				override val colorSelected = kotlinx.coroutines.flow.MutableStateFlow(Color.Red)
+				override val isColorActive = kotlinx.coroutines.flow.MutableStateFlow(true)
 				override fun updateColor(color: Color, shouldActivate: Boolean) {}
 				override fun toggleColorActive(active: Boolean) {}
 				override fun clearColor() {}
-				override val text = ""
+				override val text = kotlinx.coroutines.flow.MutableStateFlow("")
 				override fun updateText(newValue: String) {}
 				override val placeholderText = ""
 				override val buttonText = ""
@@ -182,9 +194,8 @@ fun ComposablePickerScreenPreviewDark() {
 					override val onButtonClick = {}
 					override val isButtonActive = false
 				}
-				override val isLoading = true
+				override val isLoading = kotlinx.coroutines.flow.MutableStateFlow(true)
 			},
-			onBackClick = {}
-		)
+		) {}
 	}
 }

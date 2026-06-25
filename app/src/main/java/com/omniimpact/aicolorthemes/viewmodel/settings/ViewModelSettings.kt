@@ -1,8 +1,8 @@
 package com.omniimpact.aicolorthemes.viewmodel.settings
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import androidx.lifecycle.ViewModel
 import com.omniimpact.aicolorthemes.model.ThemeModel
 import com.omniimpact.aicolorthemes.utility.UtilitySettings
@@ -13,9 +13,9 @@ import javax.inject.Inject
 
 interface IViewModelSettings {
 	val themes: List<ThemeModel>
-	val themeSelected: ThemeModel
+	val themeSelected: StateFlow<ThemeModel>
 	fun selectTheme(theme: ThemeModel)
-	val apiKey: String
+	val apiKey: StateFlow<String>
 	fun updateApiKey(newValue: String)
 
 	val apiKeySetting: IComposableTextSetting
@@ -32,21 +32,21 @@ class ViewModelSettings @Inject constructor(
 		ThemeModel("Dark", "dark")
 	)
 
-	override var themeSelected by mutableStateOf(
+	private val _themeSelected = MutableStateFlow(
 		themes.find { it.key == utilitySettings.getString("theme_key", "light") } ?: themes[0]
 	)
-		private set
+	override val themeSelected: StateFlow<ThemeModel> = _themeSelected.asStateFlow()
 
 	override fun selectTheme(theme: ThemeModel) {
-		themeSelected = theme
+		_themeSelected.value = theme
 		utilitySettings.saveString("theme_key", theme.key)
 	}
 
-	override var apiKey by mutableStateOf(utilitySettings.getString("api_key", ""))
-		private set
+	private val _apiKey = MutableStateFlow(utilitySettings.getString("api_key", ""))
+	override val apiKey: StateFlow<String> = _apiKey.asStateFlow()
 
 	override fun updateApiKey(newValue: String) {
-		apiKey = newValue
+		_apiKey.value = newValue
 		utilitySettings.saveString("api_key", newValue)
 	}
 
@@ -54,13 +54,13 @@ class ViewModelSettings @Inject constructor(
 		override val name = "API Key"
 		override val placeholder = "Enter your API key"
 		override val key = "api_key"
-		override val value: String get() = apiKey
+		override val value: String get() = _apiKey.value
 		override val onValueChange: (String) -> Unit = { updateApiKey(it) }
 	}
 
 	override val themeSetting = object : IComposableDropdownSetting {
 		override val name = "Theme"
-		override val selectedOption: String get() = themeSelected.name
+		override val selectedOption: String get() = _themeSelected.value.name
 		override val options: List<String> get() = themes.map { it.name }
 		override val onOptionSelected: (String) -> Unit = { name ->
 			themes.find { it.name == name }?.let { selectTheme(it) }
@@ -69,5 +69,5 @@ class ViewModelSettings @Inject constructor(
 
 	// Helper for checking if dark theme is selected (for the theme wrapper)
 	val isDarkTheme: Boolean
-		get() = themeSelected.key == "dark"
+		get() = _themeSelected.value.key == "dark"
 }

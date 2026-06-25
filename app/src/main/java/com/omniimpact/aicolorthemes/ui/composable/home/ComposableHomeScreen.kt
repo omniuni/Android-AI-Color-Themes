@@ -5,6 +5,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,23 +16,32 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.ui.unit.dp
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.omniimpact.aicolorthemes.model.ModelColorTheme
 import com.omniimpact.aicolorthemes.ui.composable.app.ComposableAppScaffold
+import com.omniimpact.aicolorthemes.ui.composable.app.Screen.Home
 import com.omniimpact.aicolorthemes.ui.theme.AIColorThemesTheme
 import com.omniimpact.aicolorthemes.viewmodel.home.IViewModelHome
 import com.omniimpact.aicolorthemes.viewmodel.home.ViewModelHome
-import com.omniimpact.aicolorthemes.ui.composable.app.Screen.Home
+import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 fun ComposableHomeScreen(
@@ -39,6 +49,12 @@ fun ComposableHomeScreen(
 	onNavigateToSettings: () -> Unit,
 	viewModel: IViewModelHome = hiltViewModel<ViewModelHome>()
 ) {
+	val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+	val themes by viewModel.themes.collectAsStateWithLifecycle()
+	val colorSelected by viewModel.colorSelected.collectAsStateWithLifecycle()
+	val isColorActive by viewModel.isColorActive.collectAsStateWithLifecycle()
+	val text by viewModel.text.collectAsStateWithLifecycle()
+
 	LaunchedEffect(Unit) {
 		viewModel.refreshSettings()
 	}
@@ -62,15 +78,18 @@ fun ComposableHomeScreen(
 		Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
 			Column {
 				val baseState = viewModel.themeCreationRowState
-				val creationState = remember(baseState, viewModel.isLoading, onNavigateToPicker) {
+				val creationState = remember(baseState, isLoading, onNavigateToPicker, colorSelected, isColorActive, text) {
 					object : IComposableThemeCreationRow by baseState {
 						override val onPickerClick = onNavigateToPicker
+						override val pickerColor = colorSelected
+						override val isSwatchActive = isColorActive
+						override val text = text
 						override val onButtonClick = {
-							if (!viewModel.isLoading) baseState.onButtonClick()
+							if (!isLoading) baseState.onButtonClick()
 						}
 					}
 				}
-				val isEmpty = viewModel.themes.isEmpty()
+				val isEmpty = themes.isEmpty()
 				androidx.compose.animation.AnimatedContent(
 					targetState = isEmpty,
 					label = "HomeContentAnimation",
@@ -83,23 +102,23 @@ fun ComposableHomeScreen(
 						modifier = Modifier
 							.fillMaxSize()
 							.then(if (isListEmpty) Modifier else Modifier.padding(bottom = 8.dp)),
-						verticalArrangement = if (isListEmpty) androidx.compose.foundation.layout.Arrangement.Center else androidx.compose.foundation.layout.Arrangement.Top
+						verticalArrangement = if (isListEmpty) Arrangement.Center else Arrangement.Top
 					) {
 						ComposableThemeCreationRow(
 							state = creationState,
 							modifier = Modifier.padding(8.dp)
 						)
 						if (isListEmpty) {
-							androidx.compose.material3.Text(
-								text = "To create a color theme,\n provide an anchor color and description\n and click Create.",
-								modifier = Modifier.padding(16.dp).fillMaxWidth(),
-								textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-								style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
-								color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant
-							)
+                            Text(
+                                text = "To create a color theme,\n provide an anchor color and description\n and click Create.",
+                                modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
 						} else {
 							LazyColumn {
-								items(viewModel.themes) { theme ->
+								items(themes) { theme ->
 									ComposableThemeItem(theme = theme, onRemove = { viewModel.removeTheme(theme) })
 								}
 							}
@@ -107,17 +126,17 @@ fun ComposableHomeScreen(
 					}
 				}
 			}
-			if (viewModel.isLoading) {
+			if (isLoading) {
 				androidx.compose.material3.Card(
 					modifier = Modifier.align(Alignment.Center).padding(16.dp),
-					elevation = androidx.compose.material3.CardDefaults.cardElevation(defaultElevation = 8.dp)
+					elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
 				) {
 					Column(modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
 						CircularProgressIndicator()
-						androidx.compose.material3.Text(
-							text = "Creating Your Theme",
-							modifier = Modifier.padding(top = 8.dp)
-						)
+                        Text(
+                            text = "Creating Your Theme",
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
 					}
 				}
 			}
@@ -126,14 +145,14 @@ fun ComposableHomeScreen(
 }
 
 class MockViewModelHome : IViewModelHome {
-	override val colorSelected = androidx.compose.ui.graphics.Color.Red
-	override val isColorActive = true
+	override val colorSelected = MutableStateFlow(Color.Red)
+	override val isColorActive = MutableStateFlow(true)
 	override fun refreshSettings() {}
-	override val text = ""
+	override val text = MutableStateFlow("")
 	override fun updateText(newValue: String) {}
 	override val themeCreationRowState = object : IComposableThemeCreationRow {
 		override val onPickerClick = {}
-		override val pickerColor = androidx.compose.ui.graphics.Color.Red
+		override val pickerColor = Color.Red
 		override val isSwatchActive = true
 		override val text = ""
 		override val onTextChange: (String) -> Unit = {}
@@ -142,16 +161,9 @@ class MockViewModelHome : IViewModelHome {
 		override val onButtonClick = {}
 		override val isButtonActive = true
 	}
-	override val themes = listOf(
-		com.omniimpact.aicolorthemes.model.ModelColorTheme(
-			themeName = "Mock Theme",
-			themeDescription = "Description",
-			promptQuery = "Query",
-			colorTheme = listOf("#FF0000", "#00FF00", "#0000FF")
-		)
-	)
-	override val isLoading = false
-	override fun removeTheme(theme: com.omniimpact.aicolorthemes.model.ModelColorTheme) {}
+	override val themes = MutableStateFlow(listOf<ModelColorTheme>())
+	override val isLoading = MutableStateFlow(false)
+	override fun removeTheme(theme: ModelColorTheme) {}
 	override fun clearThemes() {}
 }
 

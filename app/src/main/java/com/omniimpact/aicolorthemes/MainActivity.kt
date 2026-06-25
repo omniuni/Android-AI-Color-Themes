@@ -5,7 +5,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.Surface
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.runtime.getValue
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.omniimpact.aicolorthemes.ui.composable.app.ComposableAppNavHost
 import com.omniimpact.aicolorthemes.ui.theme.AIColorThemesTheme
 import com.omniimpact.aicolorthemes.viewmodel.settings.ViewModelSettings
@@ -19,7 +21,9 @@ class MainActivity : ComponentActivity() {
 		enableEdgeToEdge()
 		setContent {
 			val viewModelSettings: ViewModelSettings = hiltViewModel()
-			AIColorThemesTheme(darkTheme = viewModelSettings.isDarkTheme) {
+			val themeSelected by viewModelSettings.themeSelected.collectAsStateWithLifecycle()
+			val isDarkTheme = themeSelected.key == "dark"
+			AIColorThemesTheme(darkTheme = isDarkTheme) {
 				Surface {
 					ComposableAppNavHost()
 				}
