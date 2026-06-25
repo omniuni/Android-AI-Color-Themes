@@ -26,7 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.omniimpact.aicolorthemes.ui.composable.app.ComposableAppScaffold
 import com.omniimpact.aicolorthemes.ui.theme.AIColorThemesTheme
 import com.omniimpact.aicolorthemes.viewmodel.home.IViewModelHome
@@ -37,7 +37,7 @@ import com.omniimpact.aicolorthemes.ui.composable.app.Screen.Home
 fun ComposableHomeScreen(
 	onNavigateToPicker: () -> Unit,
 	onNavigateToSettings: () -> Unit,
-	viewModel: IViewModelHome = viewModel<ViewModelHome>()
+	viewModel: IViewModelHome = hiltViewModel<ViewModelHome>()
 ) {
 	LaunchedEffect(Unit) {
 		viewModel.refreshSettings()

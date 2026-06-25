@@ -1,19 +1,20 @@
 package com.omniimpact.aicolorthemes.viewmodel.picker
 
-import android.app.Application
 import com.omniimpact.aicolorthemes.utility.ClassLog
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import com.omniimpact.aicolorthemes.model.ModelSingleColor
 import com.omniimpact.aicolorthemes.utility.IDeepSeekResult
 import com.omniimpact.aicolorthemes.utility.UtilityDeepSeekQuery
 import com.omniimpact.aicolorthemes.utility.UtilitySettings
 import com.omniimpact.aicolorthemes.ui.composable.home.IComposableThemeCreationRow
 import androidx.core.graphics.toColorInt
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
 
 interface IViewModelPicker {
@@ -32,8 +33,11 @@ interface IViewModelPicker {
 	val isLoading: Boolean
 }
 
-class ViewModelPicker(application: Application) : AndroidViewModel(application), IViewModelPicker {
-	private val utilitySettings = UtilitySettings(application)
+@HiltViewModel
+class ViewModelPicker @Inject constructor(
+	private val utilitySettings: UtilitySettings,
+	private val utilityDeepSeekQuery: UtilityDeepSeekQuery
+) : ViewModel(), IViewModelPicker {
 	override var isLoading by mutableStateOf(false)
 		private set
 
@@ -80,7 +84,7 @@ class ViewModelPicker(application: Application) : AndroidViewModel(application),
 		ClassLog.d(ViewModelPicker::class, "onButtonClick triggered")
 		isLoading = true
 		val query = ModelSingleColor(promptQuery = text, colorHex = "")
-		UtilityDeepSeekQuery.send(getApplication(), query, object : IDeepSeekResult<ModelSingleColor> {
+		utilityDeepSeekQuery.send(query, object : IDeepSeekResult<ModelSingleColor> {
 			override fun onSuccess(result: ModelSingleColor) {
 				val colorInHex = result.colorHex
 				ClassLog.d(ViewModelPicker::class, "Received Hex Code: $colorInHex")

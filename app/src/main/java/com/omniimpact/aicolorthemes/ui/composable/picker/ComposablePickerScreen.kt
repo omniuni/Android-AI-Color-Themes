@@ -19,7 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 import com.omniimpact.aicolorthemes.ui.composable.app.ComposableAppScaffold
@@ -34,7 +34,7 @@ import com.github.skydoves.colorpicker.compose.*
 
 @Composable
 fun ComposablePickerScreen(
-	viewModel: IViewModelPicker = viewModel<ViewModelPicker>(),
+	viewModel: IViewModelPicker = hiltViewModel<ViewModelPicker>(),
 	onBackClick: () -> Unit
 ) {
 

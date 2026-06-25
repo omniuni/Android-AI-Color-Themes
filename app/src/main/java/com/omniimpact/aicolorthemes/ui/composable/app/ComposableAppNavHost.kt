@@ -1,7 +1,7 @@
 package com.omniimpact.aicolorthemes.ui.composable.app
 
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -18,7 +18,7 @@ enum class Screen(val route: String, val title: String) {
 
 @Composable
 fun ComposableAppNavHost(
-	viewModelSettings: ViewModelSettings = viewModel<ViewModelSettings>()
+	viewModelSettings: ViewModelSettings = hiltViewModel()
 ) {
 	val navController = rememberNavController()
 

@@ -1,14 +1,15 @@
 package com.omniimpact.aicolorthemes.viewmodel.settings
 
-import android.app.Application
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import com.omniimpact.aicolorthemes.model.ThemeModel
 import com.omniimpact.aicolorthemes.utility.UtilitySettings
 import com.omniimpact.aicolorthemes.ui.composable.settings.IComposableTextSetting
 import com.omniimpact.aicolorthemes.ui.composable.settings.IComposableDropdownSetting
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
 interface IViewModelSettings {
 	val themes: List<ThemeModel>
@@ -21,8 +22,10 @@ interface IViewModelSettings {
 	val themeSetting: IComposableDropdownSetting
 }
 
-class ViewModelSettings(application: Application) : AndroidViewModel(application), IViewModelSettings {
-	private val utilitySettings = UtilitySettings(application)
+@HiltViewModel
+class ViewModelSettings @Inject constructor(
+	private val utilitySettings: UtilitySettings
+) : ViewModel(), IViewModelSettings {
 
 	override val themes = listOf(
 		ThemeModel("Light", "light"),

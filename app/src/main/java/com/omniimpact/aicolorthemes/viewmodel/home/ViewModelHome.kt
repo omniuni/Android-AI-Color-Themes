@@ -1,17 +1,18 @@
 package com.omniimpact.aicolorthemes.viewmodel.home
 
-import android.app.Application
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import com.omniimpact.aicolorthemes.model.ModelColorTheme
 import com.omniimpact.aicolorthemes.utility.IDeepSeekResult
 import com.omniimpact.aicolorthemes.utility.UtilityDeepSeekQuery
 import com.omniimpact.aicolorthemes.ui.composable.home.IComposableThemeCreationRow
 import com.omniimpact.aicolorthemes.utility.UtilitySettings
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
 interface IViewModelHome {
 	val colorSelected: Color
@@ -26,8 +27,11 @@ interface IViewModelHome {
 	fun clearThemes()
 }
 
-class ViewModelHome(application: Application) : AndroidViewModel(application), IViewModelHome {
-	private val utilitySettings = UtilitySettings(application)
+@HiltViewModel
+class ViewModelHome @Inject constructor(
+	private val utilitySettings: UtilitySettings,
+	private val utilityDeepSeekQuery: UtilityDeepSeekQuery
+) : ViewModel(), IViewModelHome {
 
 	override var colorSelected by mutableStateOf(Color(utilitySettings.getInt("picker_color", Color.Transparent.toArgb())))
 		private set
@@ -73,7 +77,7 @@ class ViewModelHome(application: Application) : AndroidViewModel(application), I
 		)
 		
 		isLoading = true
-		UtilityDeepSeekQuery.send(getApplication(), query, object : IDeepSeekResult<ModelColorTheme> {
+		utilityDeepSeekQuery.send(query, object : IDeepSeekResult<ModelColorTheme> {
 			override fun onSuccess(result: ModelColorTheme) {
 				isLoading = false
 				val validColors = result.colorTheme.filter { colorHex ->

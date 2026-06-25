@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.omniimpact.aicolorthemes.model.ThemeModel
 import com.omniimpact.aicolorthemes.ui.composable.app.ComposableAppScaffold
 import com.omniimpact.aicolorthemes.ui.theme.AIColorThemesTheme
@@ -14,7 +14,7 @@ import com.omniimpact.aicolorthemes.viewmodel.settings.ViewModelSettings
 
 @Composable
 fun ComposableSettingsScreen(
-	viewModel: IViewModelSettings = viewModel<ViewModelSettings>(),
+	viewModel: IViewModelSettings = hiltViewModel<ViewModelSettings>(),
 	onBackClick: () -> Unit
 ) {
 	ComposableAppScaffold(

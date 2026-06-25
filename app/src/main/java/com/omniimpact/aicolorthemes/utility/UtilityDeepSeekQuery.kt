@@ -9,22 +9,26 @@ import org.json.JSONObject
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Utility for performing AI queries using the DeepSeek API.
  */
-object UtilityDeepSeekQuery {
+@Singleton
+class UtilityDeepSeekQuery @Inject constructor(
+    private val utilitySettings: UtilitySettings
+) {
 
     /**
      * Sends an AI query to the DeepSeek API and processes the JSON response into a result object.
      *
-     * @param context The application context.
      * @param query The query object containing the system and user prompts.
      * @param callback The callback to handle the success or failure of the network request.
      * @param T The type of the query and result model.
      */
-    fun <T : IDeepSeekQuery> send(context: Context, query: T, callback: IDeepSeekResult<T>) {
-        val apiKey = UtilitySettings(context).getString("api_key", "")
+    fun <T : IDeepSeekQuery> send(query: T, callback: IDeepSeekResult<T>) {
+        val apiKey = utilitySettings.getString("api_key", "")
         if (apiKey.isEmpty()) {
             ClassLog.e(UtilityDeepSeekQuery::class, "No API key saved")
             callback.onFailure("No API key saved")
