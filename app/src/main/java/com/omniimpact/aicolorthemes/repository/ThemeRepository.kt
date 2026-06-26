@@ -1,16 +1,24 @@
 package com.omniimpact.aicolorthemes.repository
 
 import androidx.core.graphics.toColorInt
+import com.omniimpact.aicolorthemes.database.dao.ThemeDao
+import com.omniimpact.aicolorthemes.database.entity.ThemeEntity
+import com.omniimpact.aicolorthemes.di.IoDispatcher
 import com.omniimpact.aicolorthemes.model.ModelColorTheme
 import com.omniimpact.aicolorthemes.model.ModelSingleColor
 import com.omniimpact.aicolorthemes.utility.IDeepSeekResult
 import com.omniimpact.aicolorthemes.utility.UtilityDeepSeekQuery
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -19,11 +27,33 @@ import javax.inject.Singleton
  */
 @Singleton
 class ThemeRepository @Inject constructor(
-	private val utilityDeepSeekQuery: UtilityDeepSeekQuery
+	private val utilityDeepSeekQuery: UtilityDeepSeekQuery,
+	private val themeDao: ThemeDao,
+	@param:IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) {
 
-	private val _themes = MutableStateFlow<List<ModelColorTheme>>(emptyList())
-	val themes: StateFlow<List<ModelColorTheme>> = _themes.asStateFlow()
+	val themes: StateFlow<List<ModelColorTheme>> = themeDao.getThemesFlow()
+		.combine(themeDao.getAllColorsFlow()) { themeEntities, colorEntities ->
+			val colorsByThemeId = colorEntities.groupBy { it.keyThemeId }
+			themeEntities.map { themeEntity ->
+				val colors = colorsByThemeId[themeEntity.id]
+					?.sortedBy { it.colorIndex }
+					?.map { it.colorHex }
+					?: emptyList()
+				ModelColorTheme(
+					themeName = themeEntity.title,
+					themeDescription = themeEntity.description,
+					colorTheme = colors,
+					id = themeEntity.id
+				)
+			}
+		}
+		.flowOn(ioDispatcher)
+		.stateIn(
+			scope = CoroutineScope(ioDispatcher + SupervisorJob()),
+			started = SharingStarted.Eagerly,
+			initialValue = emptyList()
+		)
 
 	/**
 	 * Requests a new color theme from the deep seek service and updates the themes array.
@@ -44,7 +74,15 @@ class ThemeRepository @Inject constructor(
 						}
 					}
 					val updatedTheme = result.data.copy(colorTheme = validColors)
-					_themes.update { listOf(updatedTheme) + it }
+					
+					val themeEntity = ThemeEntity(
+						dateCreated = System.currentTimeMillis(),
+						title = updatedTheme.themeName,
+						description = updatedTheme.themeDescription,
+						isFavorite = false
+					)
+					themeDao.insertThemeWithColors(themeEntity, validColors)
+					
 					emit(IDeepSeekResult.Success(updatedTheme))
 				}
 				is IDeepSeekResult.Failure -> {
@@ -58,14 +96,20 @@ class ThemeRepository @Inject constructor(
 	 * Removes a specific color theme from the repository array.
 	 */
 	fun removeTheme(theme: ModelColorTheme) {
-		_themes.update { it.filter { t -> t != theme } }
+		CoroutineScope(ioDispatcher).launch {
+			theme.id?.let { id ->
+				themeDao.deleteThemeWithColors(id)
+			}
+		}
 	}
 
 	/**
 	 * Clears all generated themes from the repository.
 	 */
 	fun clearThemes() {
-		_themes.value = emptyList()
+		CoroutineScope(ioDispatcher).launch {
+			themeDao.clearAllThemes()
+		}
 	}
 
 	/**

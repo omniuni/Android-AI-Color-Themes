@@ -18,7 +18,8 @@ data class ModelColorTheme(
 	override val promptQuery: String = "",
 	val themeName: String = "",
 	val themeDescription: String = "",
-	val colorTheme: List<String> = emptyList()
+	val colorTheme: List<String> = emptyList(),
+	@Transient val id: Long? = null
 ) : IDeepSeekQuery {
 	override fun copyWithPrompts(promptSystem: String, promptQuery: String): ModelColorTheme =
 		copy(promptSystem = promptSystem, promptQuery = promptQuery)

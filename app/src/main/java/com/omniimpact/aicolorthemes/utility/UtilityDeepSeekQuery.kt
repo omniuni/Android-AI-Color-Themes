@@ -48,9 +48,12 @@ class UtilityDeepSeekQuery @Inject constructor(
 		val exampleJson = JSONObject()
 		val fields = query::class.java.declaredFields
 		for (field in fields) {
-			// Skip metadata and helper fields during reflection
-			if (field.name != "INSTANCE" && field.name != "Companion" && field.name != "serialVersionUID" && 
-				field.name != "promptSystem" && field.name != "promptQuery" && field.name != "\$stable") {
+			// Skip metadata, helper fields, and transient fields during reflection
+			val isTransient = java.lang.reflect.Modifier.isTransient(field.modifiers) || 
+				field.isAnnotationPresent(Transient::class.java)
+			if (!isTransient && field.name != "INSTANCE" && field.name != "Companion" && 
+				field.name != "serialVersionUID" && field.name != "promptSystem" && 
+				field.name != "promptQuery" && field.name != "\$stable") {
 				field.isAccessible = true // Ensure private fields can be accessed
 				val type = field.type
 				exampleJson.put(field.name, when {
