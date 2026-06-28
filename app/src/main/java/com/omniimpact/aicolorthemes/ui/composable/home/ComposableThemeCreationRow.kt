@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Colorize
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -19,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
@@ -30,6 +33,8 @@ interface IComposableThemeCreationRow {
 	val onPickerClick: () -> Unit
 	val pickerColor: Color
 	val isSwatchActive: Boolean
+	val swatchIcon: androidx.compose.ui.graphics.vector.ImageVector
+		get() = Icons.Default.Colorize
 	val text: String
 	val onTextChange: (String) -> Unit
 	val placeholderText: String
@@ -41,16 +46,16 @@ interface IComposableThemeCreationRow {
 @Composable
 fun ComposableThemeCreationRow(
 	state: IComposableThemeCreationRow,
-	modifier: Modifier = Modifier
+	modifier: Modifier = Modifier,
 ) {
 	val focusManager = LocalFocusManager.current
 	Card(
 		modifier = modifier.fillMaxWidth(),
-		shape = MaterialTheme.shapes.medium
+		shape = MaterialTheme.shapes.medium,
 	) {
 		Row(
 			modifier = Modifier.fillMaxWidth(),
-			verticalAlignment = Alignment.CenterVertically
+			verticalAlignment = Alignment.CenterVertically,
 		) {
 			// Color Swatch Button
 			Button(
@@ -65,13 +70,23 @@ fun ComposableThemeCreationRow(
 				contentPadding = PaddingValues(0.dp),
 				colors = ButtonDefaults.buttonColors(
 					containerColor = state.pickerColor,
-					contentColor = MaterialTheme.colorScheme.onSurface
-				)
+					contentColor = if (state.isSwatchActive) {
+						if (state.pickerColor.luminance() > 0.5f) Color.Black else Color.White
+					} else {
+						MaterialTheme.colorScheme.onSurface
+					},
+				),
 			) {
-				if (!state.isSwatchActive) {
+				val isClearIcon = (state.swatchIcon == Icons.Default.Clear) || (state.swatchIcon == Icons.Default.Close)
+				val shouldShowIcon = if (isClearIcon) {
+					state.isSwatchActive
+				} else {
+					true
+				}
+				if (shouldShowIcon) {
 					Icon(
-						imageVector = Icons.Default.Close,
-						contentDescription = stringResource(R.string.inactive)
+						imageVector = state.swatchIcon,
+						contentDescription = if (isClearIcon) stringResource(R.string.clear_color) else stringResource(R.string.inactive),
 					)
 				}
 			}
@@ -89,8 +104,8 @@ fun ComposableThemeCreationRow(
 				colors = TextFieldDefaults.colors(
 					focusedIndicatorColor = Color.Transparent,
 					unfocusedIndicatorColor = Color.Transparent,
-					disabledIndicatorColor = Color.Transparent
-				)
+					disabledIndicatorColor = Color.Transparent,
+				),
 			)
 
 			// Action Button
@@ -104,12 +119,12 @@ fun ComposableThemeCreationRow(
 					.aspectRatio(1f),
 				shape = RectangleShape,
 				contentPadding = PaddingValues(0.dp),
-				enabled = state.isButtonActive
+				enabled = state.isButtonActive,
 			) {
 				Text(
 					text = state.buttonText,
 					style = MaterialTheme.typography.labelSmall,
-					maxLines = 1
+					maxLines = 1,
 				)
 			}
 		}

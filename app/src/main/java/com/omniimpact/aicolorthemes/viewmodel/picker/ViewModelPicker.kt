@@ -11,6 +11,8 @@ import com.omniimpact.aicolorthemes.ui.composable.home.IComposableThemeCreationR
 import com.omniimpact.aicolorthemes.utility.ClassLog
 import com.omniimpact.aicolorthemes.utility.IDeepSeekResult
 import com.omniimpact.aicolorthemes.utility.IUtilitySettings
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -126,6 +128,8 @@ class ViewModelPicker @Inject constructor(
 			override val onPickerClick = { toggleColorActive(!isColorActive.value) }
 			override val pickerColor = if (isColorActive.value) colorSelected.value else Color.Transparent
 			override val isSwatchActive = isColorActive.value
+			override val swatchIcon: androidx.compose.ui.graphics.vector.ImageVector
+				get() = Icons.Default.Clear
 			override val text = _text.value
 			override val onTextChange = { newText: String -> updateText(newText) }
 			override val placeholderText = this@ViewModelPicker.placeholderText

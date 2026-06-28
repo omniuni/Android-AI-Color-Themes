@@ -60,6 +60,7 @@ fun ComposablePickerScreen(
 			override val pickerColor = if (isColorActive) colorSelected else Color.Transparent
 			override val isSwatchActive = isColorActive
 			override val text = text
+			override val swatchIcon = baseState.swatchIcon
 			override val isButtonActive = !isLoading
 		}
 	}

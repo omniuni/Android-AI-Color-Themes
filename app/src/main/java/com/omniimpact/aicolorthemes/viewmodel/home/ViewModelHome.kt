@@ -9,6 +9,8 @@ import com.omniimpact.aicolorthemes.utility.IDeepSeekResult
 import com.omniimpact.aicolorthemes.repository.ThemeRepository
 import com.omniimpact.aicolorthemes.ui.composable.home.IComposableThemeCreationRow
 import com.omniimpact.aicolorthemes.utility.IUtilitySettings
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Colorize
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -108,6 +110,8 @@ class ViewModelHome @Inject constructor(
 				get() = if (isColorActive.value) colorSelected.value else Color.Transparent
 			override val isSwatchActive: Boolean
 				get() = isColorActive.value
+			override val swatchIcon: androidx.compose.ui.graphics.vector.ImageVector
+				get() = Icons.Default.Colorize
 			override val text: String
 				get() = _text.value
 			override val onTextChange = { newText: String -> updateText(newText) }

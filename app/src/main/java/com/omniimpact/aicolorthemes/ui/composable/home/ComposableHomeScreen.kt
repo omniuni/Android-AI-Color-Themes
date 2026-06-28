@@ -83,6 +83,7 @@ fun ComposableHomeScreen(
 						override val pickerColor = colorSelected
 						override val isSwatchActive = isColorActive
 						override val text = text
+						override val swatchIcon = baseState.swatchIcon
 						override val onButtonClick = {
 							if (!isLoading) baseState.onButtonClick()
 						}

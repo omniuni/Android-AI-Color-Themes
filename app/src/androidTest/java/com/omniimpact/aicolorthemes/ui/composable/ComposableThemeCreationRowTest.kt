@@ -1,5 +1,8 @@
 package com.omniimpact.aicolorthemes.ui.composable
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Colorize
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
@@ -28,11 +31,12 @@ class ComposableThemeCreationRowTest {
 		override val placeholderText: String = "Placeholder",
 		override val buttonText: String = "Create",
 		override val isButtonActive: Boolean = true,
-		override val onButtonClick: () -> Unit = {}
+		override val onButtonClick: () -> Unit = {},
+		override val swatchIcon: androidx.compose.ui.graphics.vector.ImageVector = Icons.Default.Colorize,
 	) : IComposableThemeCreationRow
 
 	@Test
-	fun whenSwatchIsInactive_showsCloseIcon() {
+	fun whenSwatchIsInactive_showsEyedropperIcon() {
 		val state = TestThemeCreationRowState(isSwatchActive = false)
 		composeTestRule.setContent {
 			ComposableThemeCreationRow(state = state)
@@ -42,13 +46,39 @@ class ComposableThemeCreationRowTest {
 	}
 
 	@Test
-	fun whenSwatchIsActive_doesNotShowCloseIcon() {
+	fun whenSwatchIsActive_showsEyedropperIcon() {
 		val state = TestThemeCreationRowState(isSwatchActive = true)
 		composeTestRule.setContent {
 			ComposableThemeCreationRow(state = state)
 		}
 
-		composeTestRule.onNodeWithContentDescription("Inactive").assertDoesNotExist()
+		composeTestRule.onNodeWithContentDescription("Inactive").assertExists()
+	}
+
+	@Test
+	fun whenSwatchIsActiveAndClearIcon_showsClearIcon() {
+		val state = TestThemeCreationRowState(
+			isSwatchActive = true,
+			swatchIcon = Icons.Default.Clear,
+		)
+		composeTestRule.setContent {
+			ComposableThemeCreationRow(state = state)
+		}
+
+		composeTestRule.onNodeWithContentDescription("Clear Color").assertExists()
+	}
+
+	@Test
+	fun whenSwatchIsInactiveAndClearIcon_doesNotShowClearIcon() {
+		val state = TestThemeCreationRowState(
+			isSwatchActive = false,
+			swatchIcon = Icons.Default.Clear,
+		)
+		composeTestRule.setContent {
+			ComposableThemeCreationRow(state = state)
+		}
+
+		composeTestRule.onNodeWithContentDescription("Clear Color").assertDoesNotExist()
 	}
 
 	@Test
