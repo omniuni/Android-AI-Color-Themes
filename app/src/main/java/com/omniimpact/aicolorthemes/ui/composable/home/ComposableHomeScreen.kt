@@ -80,7 +80,7 @@ fun ComposableHomeScreen(
 				val creationState = remember(baseState, isLoading, onNavigateToPicker, colorSelected, isColorActive, text) {
 					object : IComposableThemeCreationRow by baseState {
 						override val onPickerClick = onNavigateToPicker
-						override val pickerColor = colorSelected
+						override val pickerColor = if (isColorActive) colorSelected else Color.Transparent
 						override val isSwatchActive = isColorActive
 						override val text = text
 						override val swatchIcon = baseState.swatchIcon
