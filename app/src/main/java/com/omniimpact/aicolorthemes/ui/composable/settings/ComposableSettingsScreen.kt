@@ -54,7 +54,11 @@ class MockViewModelSettings(
 ) : IViewModelSettings {
 	override val themes = listOf(
 		ThemeModel("Light", "light"),
-		ThemeModel("Dark", "dark")
+		ThemeModel("Dark", "dark"),
+		ThemeModel("Material 3 Light", "m3_light"),
+		ThemeModel("Material 3 Dark", "m3_dark"),
+		ThemeModel("Dynamic Light", "dynamic_light"),
+		ThemeModel("Dynamic Dark", "dynamic_dark")
 	)
 	override val themeSelected = MutableStateFlow(theme)
 	override fun selectTheme(theme: ThemeModel) { themeSelected.value = theme }
@@ -83,7 +87,7 @@ class MockViewModelSettings(
 @Preview(showBackground = true, name = "Light Theme")
 @Composable
 fun PreviewSettingsScreenLight() {
-	AIColorThemesTheme(darkTheme = false) {
+	AIColorThemesTheme(themeKey = "light") {
 		ComposableSettingsScreen(
 			viewModel = MockViewModelSettings(ThemeModel("Light", "light")),
 		) {}
@@ -93,7 +97,7 @@ fun PreviewSettingsScreenLight() {
 @Preview(showBackground = true, name = "Dark Theme")
 @Composable
 fun PreviewSettingsScreenDark() {
-	AIColorThemesTheme(darkTheme = true) {
+	AIColorThemesTheme(themeKey = "dark") {
 		ComposableSettingsScreen(
 			viewModel = MockViewModelSettings(ThemeModel("Dark", "dark")),
 		) {}

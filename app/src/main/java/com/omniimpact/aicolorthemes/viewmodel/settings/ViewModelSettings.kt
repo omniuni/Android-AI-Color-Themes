@@ -32,7 +32,11 @@ class ViewModelSettings @Inject constructor(
 
 	override val themes = listOf(
 		ThemeModel("Light", "light"),
-		ThemeModel("Dark", "dark")
+		ThemeModel("Dark", "dark"),
+		ThemeModel("Material 3 Light", "m3_light"),
+		ThemeModel("Material 3 Dark", "m3_dark"),
+		ThemeModel("Dynamic Light", "dynamic_light"),
+		ThemeModel("Dynamic Dark", "dynamic_dark")
 	)
 
 	override val themeSelected: StateFlow<ThemeModel> = utilitySettings.getStringFlow("theme_key", "light")
@@ -81,5 +85,5 @@ class ViewModelSettings @Inject constructor(
 
 	// Helper for checking if dark theme is selected (for the theme wrapper)
 	val isDarkTheme: Boolean
-		get() = themeSelected.value.key == "dark"
+		get() = themeSelected.value.key == "dark" || themeSelected.value.key == "m3_dark" || themeSelected.value.key == "dynamic_dark"
 }

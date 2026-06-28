@@ -22,8 +22,8 @@ class MainActivity : ComponentActivity() {
 		setContent {
 			val viewModelSettings: ViewModelSettings = hiltViewModel()
 			val themeSelected by viewModelSettings.themeSelected.collectAsStateWithLifecycle()
-			val isDarkTheme = themeSelected.key == "dark"
-			AIColorThemesTheme(darkTheme = isDarkTheme) {
+			val isDarkTheme = themeSelected.key == "dark" || themeSelected.key == "m3_dark" || themeSelected.key == "dynamic_dark"
+			AIColorThemesTheme(themeKey = themeSelected.key, darkTheme = isDarkTheme) {
 				Surface {
 					ComposableAppNavHost()
 				}
