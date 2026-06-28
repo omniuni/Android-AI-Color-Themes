@@ -20,11 +20,11 @@ import javax.inject.Singleton
  */
 @Singleton
 class UtilityDeepSeekQuery @Inject constructor(
-	private val utilitySettings: UtilitySettings,
+	private val utilitySettings: IUtilitySettings,
 	private val moshi: Moshi,
 	private val deepSeekApiService: DeepSeekApiService,
 	@param:IoDispatcher private val ioDispatcher: CoroutineDispatcher
-) {
+) : IUtilityDeepSeekQuery {
 
 	/**
 	 * Sends an AI query to the DeepSeek API and streams the result states via a Flow.
@@ -33,7 +33,7 @@ class UtilityDeepSeekQuery @Inject constructor(
 	 * @param T The type of the query and result model.
 	 * @return A Flow of IDeepSeekResult representing Loading, Success, or Failure.
 	 */
-	fun <T : IDeepSeekQuery> send(query: T): Flow<IDeepSeekResult<T>> = flow {
+	override fun <T : IDeepSeekQuery> send(query: T): Flow<IDeepSeekResult<T>> = flow {
 		emit(IDeepSeekResult.Loading)
 
 		val apiKey = utilitySettings.getStringFlow("api_key", "").first()

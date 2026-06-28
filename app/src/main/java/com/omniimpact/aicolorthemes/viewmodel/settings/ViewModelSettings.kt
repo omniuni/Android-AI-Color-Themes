@@ -3,7 +3,7 @@ package com.omniimpact.aicolorthemes.viewmodel.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.omniimpact.aicolorthemes.model.ThemeModel
-import com.omniimpact.aicolorthemes.utility.UtilitySettings
+import com.omniimpact.aicolorthemes.utility.IUtilitySettings
 import com.omniimpact.aicolorthemes.ui.composable.settings.IComposableTextSetting
 import com.omniimpact.aicolorthemes.ui.composable.settings.IComposableDropdownSetting
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,7 +27,7 @@ interface IViewModelSettings {
 
 @HiltViewModel
 class ViewModelSettings @Inject constructor(
-	private val utilitySettings: UtilitySettings
+	private val utilitySettings: IUtilitySettings
 ) : ViewModel(), IViewModelSettings {
 
 	override val themes = listOf(

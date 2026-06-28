@@ -1,6 +1,9 @@
 package com.omniimpact.aicolorthemes.di
 
 import android.content.Context
+import com.omniimpact.aicolorthemes.utility.IUtilitySettings
+import com.omniimpact.aicolorthemes.utility.IUtilityDeepSeekQuery
+import com.omniimpact.aicolorthemes.utility.UtilityDeepSeekQuery
 import com.omniimpact.aicolorthemes.utility.UtilitySettings
 import com.omniimpact.aicolorthemes.network.DeepSeekApiService
 import com.squareup.moshi.Moshi
@@ -25,6 +28,7 @@ annotation class IoDispatcher
 
 @Module
 @InstallIn(SingletonComponent::class)
+@Suppress("unused")
 object AppModule {
 
 	@Provides
@@ -33,8 +37,19 @@ object AppModule {
 
 	@Provides
 	@Singleton
-	fun provideUtilitySettings(@ApplicationContext context: Context): UtilitySettings {
+	fun provideUtilitySettings(@ApplicationContext context: Context): IUtilitySettings {
 		return UtilitySettings(context)
+	}
+
+	@Provides
+	@Singleton
+	fun provideUtilityDeepSeekQuery(
+		utilitySettings: IUtilitySettings,
+		moshi: Moshi,
+		deepSeekApiService: DeepSeekApiService,
+		@IoDispatcher ioDispatcher: CoroutineDispatcher
+	): IUtilityDeepSeekQuery {
+		return UtilityDeepSeekQuery(utilitySettings, moshi, deepSeekApiService, ioDispatcher)
 	}
 
 	@Provides

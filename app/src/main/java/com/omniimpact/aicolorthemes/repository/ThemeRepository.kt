@@ -7,7 +7,7 @@ import com.omniimpact.aicolorthemes.di.IoDispatcher
 import com.omniimpact.aicolorthemes.model.ModelColorTheme
 import com.omniimpact.aicolorthemes.model.ModelSingleColor
 import com.omniimpact.aicolorthemes.utility.IDeepSeekResult
-import com.omniimpact.aicolorthemes.utility.UtilityDeepSeekQuery
+import com.omniimpact.aicolorthemes.utility.IUtilityDeepSeekQuery
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -27,7 +27,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class ThemeRepository @Inject constructor(
-	private val utilityDeepSeekQuery: UtilityDeepSeekQuery,
+	private val utilityDeepSeekQuery: IUtilityDeepSeekQuery,
 	private val themeDao: ThemeDao,
 	@param:IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) {

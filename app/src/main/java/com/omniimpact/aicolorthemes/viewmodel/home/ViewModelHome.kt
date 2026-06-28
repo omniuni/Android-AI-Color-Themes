@@ -8,7 +8,7 @@ import com.omniimpact.aicolorthemes.model.ModelColorTheme
 import com.omniimpact.aicolorthemes.utility.IDeepSeekResult
 import com.omniimpact.aicolorthemes.repository.ThemeRepository
 import com.omniimpact.aicolorthemes.ui.composable.home.IComposableThemeCreationRow
-import com.omniimpact.aicolorthemes.utility.UtilitySettings
+import com.omniimpact.aicolorthemes.utility.IUtilitySettings
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -33,7 +33,7 @@ interface IViewModelHome {
 
 @HiltViewModel
 class ViewModelHome @Inject constructor(
-	private val utilitySettings: UtilitySettings,
+	private val utilitySettings: IUtilitySettings,
 	private val themeRepository: ThemeRepository
 ) : ViewModel(), IViewModelHome {
 

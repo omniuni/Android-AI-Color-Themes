@@ -19,12 +19,12 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
  *
  * @param context The application context used to access DataStore.
  */
-class UtilitySettings(private val context: Context) {
+class UtilitySettings(private val context: Context) : IUtilitySettings {
 
 	/**
 	 * Retrieves a Flow of a string value associated with a specific key.
 	 */
-	fun getStringFlow(key: String, defaultValue: String): Flow<String> {
+	override fun getStringFlow(key: String, defaultValue: String): Flow<String> {
 		return context.dataStore.data.map { preferences ->
 			preferences[stringPreferencesKey(key)] ?: defaultValue
 		}
@@ -36,7 +36,7 @@ class UtilitySettings(private val context: Context) {
 	 * @param key The key to associate the value with.
 	 * @param value The string value to save.
 	 */
-	suspend fun saveString(key: String, value: String) {
+	override suspend fun saveString(key: String, value: String) {
 		context.dataStore.edit { settings ->
 			settings[stringPreferencesKey(key)] = value
 		}
@@ -45,7 +45,7 @@ class UtilitySettings(private val context: Context) {
 	/**
 	 * Retrieves a Flow of a boolean value associated with a specific key.
 	 */
-	fun getBooleanFlow(key: String, defaultValue: Boolean): Flow<Boolean> {
+	override fun getBooleanFlow(key: String, defaultValue: Boolean): Flow<Boolean> {
 		return context.dataStore.data.map { preferences ->
 			preferences[booleanPreferencesKey(key)] ?: defaultValue
 		}
@@ -57,7 +57,7 @@ class UtilitySettings(private val context: Context) {
 	 * @param key The key to associate the value with.
 	 * @param value The boolean value to save.
 	 */
-	suspend fun saveBoolean(key: String, value: Boolean) {
+	override suspend fun saveBoolean(key: String, value: Boolean) {
 		context.dataStore.edit { settings ->
 			settings[booleanPreferencesKey(key)] = value
 		}
@@ -66,7 +66,7 @@ class UtilitySettings(private val context: Context) {
 	/**
 	 * Retrieves a Flow of an integer value associated with a specific key.
 	 */
-	fun getIntFlow(key: String, defaultValue: Int): Flow<Int> {
+	override fun getIntFlow(key: String, defaultValue: Int): Flow<Int> {
 		return context.dataStore.data.map { preferences ->
 			preferences[intPreferencesKey(key)] ?: defaultValue
 		}
@@ -78,7 +78,7 @@ class UtilitySettings(private val context: Context) {
 	 * @param key The key to associate the value with.
 	 * @param value The integer value to save.
 	 */
-	suspend fun saveInt(key: String, value: Int) {
+	override suspend fun saveInt(key: String, value: Int) {
 		context.dataStore.edit { settings ->
 			settings[intPreferencesKey(key)] = value
 		}
