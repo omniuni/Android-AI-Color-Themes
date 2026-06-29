@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Settings
@@ -25,7 +26,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -56,6 +59,15 @@ fun ComposableHomeScreen(
 	val colorSelected by viewModel.colorSelected.collectAsStateWithLifecycle()
 	val isColorActive by viewModel.isColorActive.collectAsStateWithLifecycle()
 	val text by viewModel.text.collectAsStateWithLifecycle()
+
+	var selectedThemeForRefinement by remember { mutableStateOf<ModelColorTheme?>(null) }
+	val listState = rememberLazyListState()
+
+	LaunchedEffect(themes.size) {
+		if (themes.isNotEmpty()) {
+			listState.animateScrollToItem(0)
+		}
+	}
 
 	ComposableAppScaffold(
 		title = Home.title,
@@ -109,17 +121,23 @@ fun ComposableHomeScreen(
 							modifier = Modifier.padding(8.dp)
 						)
 						if (isListEmpty) {
-                            Text(
-                                text = stringResource(R.string.home_empty_prompt),
-                                modifier = Modifier.padding(16.dp).fillMaxWidth(),
-                                textAlign = TextAlign.Center,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+							Text(
+								text = stringResource(R.string.home_empty_prompt),
+								modifier = Modifier.padding(16.dp).fillMaxWidth(),
+								textAlign = TextAlign.Center,
+								style = MaterialTheme.typography.bodyMedium,
+								color = MaterialTheme.colorScheme.onSurfaceVariant
+							)
 						} else {
-							LazyColumn {
+							LazyColumn(state = listState) {
 								items(themes) { theme ->
-									ComposableThemeItem(theme = theme, onRemove = { viewModel.removeTheme(theme) })
+									ComposableThemeItem(
+										theme = theme,
+										showRefineButton = true,
+										showRemoveButton = true,
+										onRefine = { selectedThemeForRefinement = theme },
+										onRemove = { viewModel.removeTheme(theme) }
+									)
 								}
 							}
 						}
@@ -133,13 +151,23 @@ fun ComposableHomeScreen(
 				) {
 					Column(modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
 						CircularProgressIndicator()
-                        Text(
-                            text = stringResource(R.string.creating_your_theme),
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
+						Text(
+							text = stringResource(R.string.creating_your_theme),
+							modifier = Modifier.padding(top = 8.dp)
+						)
 					}
 				}
 			}
+		}
+
+		selectedThemeForRefinement?.let { theme ->
+			ComposableRefineBottomSheet(
+				theme = theme,
+				onDismiss = { selectedThemeForRefinement = null },
+				onSubmit = { refinedTheme, request ->
+					viewModel.refineTheme(refinedTheme, request)
+				}
+			)
 		}
 	}
 }
@@ -164,6 +192,7 @@ class MockViewModelHome : IViewModelHome {
 	override val isLoading = MutableStateFlow(false)
 	override fun removeTheme(theme: ModelColorTheme) {}
 	override fun clearThemes() {}
+	override fun refineTheme(theme: ModelColorTheme, request: String) {}
 }
 
 @PreviewLightDark

@@ -31,6 +31,7 @@ interface IViewModelHome {
 	val isLoading: StateFlow<Boolean>
 	fun removeTheme(theme: ModelColorTheme)
 	fun clearThemes()
+	fun refineTheme(theme: ModelColorTheme, request: String)
 }
 
 @HiltViewModel
@@ -72,6 +73,50 @@ class ViewModelHome @Inject constructor(
 
 	override fun clearThemes() {
 		themeRepository.clearThemes()
+	}
+
+	override fun refineTheme(theme: ModelColorTheme, request: String) {
+		val systemPrompt = """Return an updated color theme between 3 and 12 colors.
+Make sure to include at least one very dark and one very light color for contrast.
+Include at least one complimentary color with a distinctly different hue or shade from the others.
+If the user asks for many colors, more colors, or a lot of colors, generate more colors.
+In larger themes, include some colors of different saturation and another hue.
+Do not repeat colors. Do not include hex codes in the name or description of the theme.
+The themeName is a title that should reflect the prompt, or what part of the prompt inspired the theme.
+The themeDescription should focus on the inspiration and concept behind the theme. Keep the description to a single sentence.
+Order the colors from darker shades to lighter, except the base color theme, which is always first.
+Most of the theme should be based on the base color theme if it is provided.
+Try to vary the approach to the color theme within these parameters, and avoid hues that are too similar and could clash.
+If the user requests `with` a color, or an `accent`, or similar phrasing, include it only as necessary.
+If a base color theme is provided, always make it the first one in the theme regardless of shade or brightness.""".trimMargin()
+
+		val userQuery = "This is the base color theme, make as small of a change as possible that satisfies the user request: ${theme.colorTheme.joinToString(", ")}\n" +
+			"The original theme was called \"${theme.themeName}\" and was described as \"${theme.themeDescription}\".\n\n" +
+			request
+
+		val query = ModelColorTheme(
+			promptSystem = systemPrompt,
+			promptQuery = userQuery,
+			themeName = "",
+			themeDescription = "",
+			colorTheme = emptyList()
+		)
+
+		viewModelScope.launch {
+			themeRepository.createTheme(query).collect { result ->
+				when (result) {
+					is IDeepSeekResult.Loading -> {
+						_isLoading.value = true
+					}
+					is IDeepSeekResult.Success -> {
+						_isLoading.value = false
+					}
+					is IDeepSeekResult.Failure -> {
+						_isLoading.value = false
+					}
+				}
+			}
+		}
 	}
 	
 	private fun createTheme() {

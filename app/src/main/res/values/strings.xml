@@ -9,4 +9,8 @@
     <string name="picking_your_color">Picking Your Color</string>
     <string name="creating_your_theme">Creating Your Theme</string>
     <string name="home_empty_prompt">To create a color theme,\n provide an anchor color and description\n and click Create.</string>
+    <string name="refine">Refine</string>
+    <string name="refine_theme">Refine Theme</string>
+    <string name="create">Create</string>
+    <string name="close">Close</string>
 </resources>
